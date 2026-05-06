@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleet Lifecycle Cost Calculator — User Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f3f7;color:#1a1a1a;font-size:15px;line-height:1.7}
+
+/* ── PAGE HEADER ── */
+.site-header{background:#1F3864;color:#fff;padding:22px 0}
+.site-header-inner{max-width:860px;margin:0 auto;padding:0 32px}
+.site-header h1{font-size:26px;font-weight:700;letter-spacing:-.3px}
+.site-header p{font-size:14px;opacity:.7;margin-top:4px}
+
+/* ── BLOG ── */
+.blog{max-width:860px;margin:0 auto;padding:40px 32px 0}
+.blog-meta{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#2E75B6;margin-bottom:12px}
+.blog h2{font-size:22px;font-weight:700;color:#1F3864;margin:32px 0 10px;padding-bottom:6px;border-bottom:2px solid #dde3ec}
+.blog h3{font-size:16px;font-weight:700;color:#1F3864;margin:22px 0 6px}
+.blog p{margin-bottom:14px;color:#2a2a2a}
+.blog .lead{font-size:17px;color:#333;line-height:1.8;margin-bottom:20px}
+.steps{counter-reset:steps;list-style:none;margin:0 0 16px;padding:0}
+.steps li{counter-increment:steps;display:flex;gap:14px;margin-bottom:18px;padding:16px 18px;background:#fff;border:1px solid #dde3ec;border-radius:8px;border-left:4px solid #2E75B6}
+.steps li::before{content:counter(steps);font-size:18px;font-weight:700;color:#2E75B6;min-width:24px;margin-top:1px}
+.steps li .step-body h3{margin:0 0 4px;font-size:14px;color:#1F3864}
+.steps li .step-body p{margin:0;font-size:13px;color:#555;line-height:1.6}
+.tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.tip{background:#fff;border:1px solid #dde3ec;border-radius:8px;padding:14px 16px;font-size:13px;color:#444;line-height:1.6}
+.tip strong{display:block;color:#1F3864;margin-bottom:3px;font-size:13px}
+.blog-divider{border:none;border-top:2px solid #dde3ec;margin:36px 0 0}
+
+/* ── CALCULATOR BAND ── */
+.calc-band{background:#1F3864;color:#fff;padding:20px 0;margin-top:0}
+.calc-band-inner{max-width:860px;margin:0 auto;padding:0 32px;display:flex;align-items:baseline;gap:14px}
+.calc-band h2{font-size:20px;font-weight:700}
+.calc-band span{font-size:13px;opacity:.65}
+
+/* ── CALCULATOR ── */
+.calc-wrap{max-width:860px;margin:0 auto;padding:24px 32px 48px}
+.tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:2px solid #dde3ec}
+.tab{padding:8px 18px;border:1px solid transparent;border-bottom:none;border-radius:6px 6px 0 0;font-size:13px;font-weight:700;cursor:pointer;background:#e2e8f2;color:#555;margin-bottom:-2px}
+.tab.active{background:#fff;border-color:#dde3ec;border-bottom-color:#fff;color:#1F3864}
+.pane{display:none}.pane.active{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.card{background:#fff;border:1px solid #dde3ec;border-radius:8px;padding:16px 18px}
+.card-label{font-size:11px;font-weight:700;letter-spacing:.06em;color:#777;text-transform:uppercase;margin-bottom:8px}
+.card-val{font-size:24px;font-weight:700;color:#1a1a1a}
+.card-sub{font-size:12px;color:#888;margin-top:3px}
+.card.blue{border-left:4px solid #2E75B6}
+.card.orange{border-left:4px solid #C55A11}
+.card.green{border-left:4px solid #375623}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.06em;color:#777;text-transform:uppercase;margin-bottom:10px;margin-top:20px}
+.field{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}
+.field label{font-size:12px;color:#555;font-weight:700}
+input[type=number],input[type=text],select{padding:6px 9px;font-size:13px;border:1px solid #c8d0dc;border-radius:5px;background:#fff;color:#1a1a1a;width:100%}
+input:focus,select:focus{outline:2px solid #2E75B6;outline-offset:1px}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.btn{padding:8px 20px;background:#1F3864;color:#fff;border:none;border-radius:5px;font-size:13px;font-weight:700;cursor:pointer}
+.btn:hover{background:#2E75B6}
+.btn-outline{padding:7px 16px;background:none;border:1px dashed #aaa;border-radius:5px;font-size:13px;cursor:pointer;color:#555;display:flex;align-items:center;gap:6px;margin-top:10px;width:fit-content}
+.btn-outline:hover{background:#f0f4fa;color:#1F3864}
+.winner{border-radius:8px;padding:14px 18px;margin-bottom:18px}
+.winner.carrier{background:#dbeafe;border:1px solid #93c5fd}
+.winner.tk{background:#fef3c7;border:1px solid #fcd34d}
+.winner.tie{background:#f1f3f5;border:1px solid #ced4da}
+.win-label{font-size:12px;color:#555;margin-bottom:4px}
+.win-val{font-size:19px;font-weight:700}
+.win-carrier{color:#1d4ed8}.win-tk{color:#92400e}.win-tie{color:#555}
+.sep{border:none;border-top:1px solid #dde3ec;margin:18px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:7px 8px;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #dde3ec;white-space:nowrap;background:#f8f9fb}
+tbody td{padding:7px 8px;border-bottom:1px solid #eaedf1;vertical-align:middle}
+tbody tr:hover{background:#f8f9fb}
+tbody tr:last-child td{border-bottom:none}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.hl{background:#f0f4fa!important;font-weight:700}
+.mt{table-layout:fixed;width:100%}
+.mt th,.mt td{padding:5px 4px}
+.mt input[type=number],.mt input[type=text]{padding:4px 6px;font-size:12px;background:#f8f9fb}
+.mt select{padding:4px 5px;font-size:12px;background:#f8f9fb}
+.mt input:disabled,.mt select:disabled{opacity:.3;background:#eee;cursor:not-allowed}
+.del-btn{background:none;border:none;cursor:pointer;color:#bbb;font-size:16px;padding:0 3px}
+.del-btn:hover{color:#dc2626}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
+.badge.win{background:#d1fae5;color:#065f46}
+.badge.loss{background:#fee2e2;color:#991b1b}
+.badge.tie{background:#f1f5f9;color:#475569}
+.chart-wrap{position:relative;width:100%;height:280px;margin:14px 0}
+.legend{display:flex;gap:20px;font-size:12px;color:#555;margin-bottom:4px}
+.legend span{display:flex;align-items:center;gap:6px}
+.cnote{font-size:12px;color:#888;margin-bottom:12px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="site-header">
+  <div class="site-header-inner">
+    <h1>Fleet Equipment — Lifecycle Costing &amp; TCO</h1>
+    <p>A guide for fleet managers on total cost of ownership, plus an interactive calculator</p>
+  </div>
+</div>
+
+<!-- BLOG CONTENT -->
+<div class="blog">
+  <div class="blog-meta">Fleet Management Guide</div>
+
+  <p class="lead">The sticker price is only the beginning. A reefer unit that costs $2,000 less at purchase can easily cost $15,000 more over 15 years once fuel burn, maintenance intervals, brand-specific wear parts, and labor rates are fully accounted for. This guide explains how to use the lifecycle cost calculator below to make that comparison with your own numbers.</p>
+
+  <h2>What the calculator models</h2>
+  <p>The calculator computes total cost of ownership (TCO) for Carrier and ThermoKing reefer units over your full operating period — up to 20 years. It accounts for six cost categories:</p>
+  <div class="tip-grid">
+    <div class="tip"><strong>Capital cost</strong>Per-unit purchase price, felt in year one and compared directly between brands.</div>
+    <div class="tip"><strong>Maintenance</strong>Every scheduled service event — parts cost plus technician labor (SRT × your shop rate) — triggered by operating hours.</div>
+    <div class="tip"><strong>Fuel</strong>Burn rate ($/hr) × annual hours × years. Even a $0.14/hr difference compounds to tens of thousands across a large fleet.</div>
+    <div class="tip"><strong>Telematics</strong>Hardware installation cost plus monthly subscription, modeled across the full period.</div>
+    <div class="tip"><strong>Changeover costs</strong>Year-1 costs for switching to Carrier (tooling, training, inventory). The model tapers these over years 2–4.</div>
+    <div class="tip"><strong>Brand-specific events</strong>Parts unique to one platform (nylon gear, head gaskets, generator, etc.) are marked Carrier-only or TK-only so comparisons stay apples-to-apples.</div>
+  </div>
+
+  <h2>How to use it — four steps</h2>
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <h3>Fleet inputs</h3>
+        <p>Enter your fleet size, the percentage of Carrier units, average annual operating hours, and the number of years to model. Then fill in per-unit costs for each brand: capital, labor rate, fuel cost, telematics hardware and monthly fee, and Carrier changeover cost.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <h3>Maintenance schedule</h3>
+        <p>Every service event is listed with editable fields for interval (hours), parts cost, and SRT (standard repair time in hours) for each brand. Change any value to match your actual negotiated pricing. Use the brand dropdown to flag Carrier-only or TK-only events — irrelevant cost fields grey out automatically. Use the <strong>+ Add custom event</strong> button for anything not already in the list, and the &times; button to remove events that don't apply to your fleet.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <h3>TCO summary</h3>
+        <p>Click <strong>Calculate TCO</strong>. The summary shows which brand wins, the per-unit savings amount, and the crossover year — the point where cumulative costs flip. A breakdown table separates capital, maintenance, fuel, telematics, and changeover so you can see exactly where each brand gains or loses. Fleet-level totals scale everything up to your full unit counts.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <h3>Year-by-year view</h3>
+        <p>The year-by-year tab plots cumulative TCO for both brands on a line chart and shows annual and cumulative cost per year in a table. Use this to identify peak-cost years (where multiple major events converge) and to determine the minimum hold period required to realize the value of the higher-priced unit.</p>
+      </div>
+    </li>
+  </ol>
+
+  <h2>Tips for accurate results</h2>
+  <div class="tip-grid">
+    <div class="tip"><strong>Use negotiated parts prices</strong>The TK discount field handles % off list automatically. Enter your real contract pricing for Carrier parts.</div>
+    <div class="tip"><strong>Use your fully-loaded labor rate</strong>Include overhead, not just the technician wage. A $100/hr vs $130/hr difference shifts the maintenance comparison significantly.</div>
+    <div class="tip"><strong>Run to full asset life</strong>12–15 years minimum. Short horizons favour the cheaper unit because capital cost dominates early and maintenance compounds later.</div>
+    <div class="tip"><strong>Add custom events</strong>Any fleet-specific rebuild or scheduled item not in the default list should be added — unmodelled events understate one brand's true cost.</div>
+  </div>
+
+  <p style="font-size:13px;color:#888;font-style:italic;margin-top:8px">Default values are loaded from a 200-asset Carrier fleet analysis and can be overridden completely. They are a starting point, not a recommendation.</p>
+
+  <hr class="blog-divider">
+</div>
+
+<!-- CALCULATOR HEADER BAND -->
+<div class="calc-band">
+  <div class="calc-band-inner">
+    <h2>Fleet Lifecycle Cost Calculator</h2>
+    <span>Total cost of ownership — Carrier vs ThermoKing</span>
+  </div>
+</div>
+
+<!-- CALCULATOR -->
+<div class="calc-wrap">
+  <div class="tabs">
+    <div class="tab active" onclick="showPane('inputs')">Fleet inputs</div>
+    <div class="tab" onclick="showPane('maint')">Maintenance schedule</div>
+    <div class="tab" onclick="showPane('summary')">TCO summary</div>
+    <div class="tab" onclick="showPane('yby')">Year-by-year</div>
+  </div>
+
+  <div id="pane-inputs" class="pane active">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-label">Fleet &amp; operations</div>
+        <div class="input-grid">
+          <div class="field"><label>Fleet size (units)</label><input type="number" id="fleetSize" value="1400" min="1"></div>
+          <div class="field"><label>Carrier % of fleet</label><input type="number" id="carrierPct" value="60" min="0" max="100"></div>
+          <div class="field"><label>Avg hours / year</label><input type="number" id="hoursPerYear" value="2000" min="100"></div>
+          <div class="field"><label>Analysis period (yrs)</label><input type="number" id="numYears" value="15" min="1" max="20"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">Carrier unit costs</div>
+        <div class="input-grid">
+          <div class="field"><label>Capital cost ($)</label><input type="number" id="cCap" value="26000"></div>
+          <div class="field"><label>Labor rate ($/hr)</label><input type="number" id="cLab" value="100"></div>
+          <div class="field"><label>Fuel cost ($/hr)</label><input type="number" id="cFuel" value="1.32"></div>
+          <div class="field"><label>Telematics capital</label><input type="number" id="cTCap" value="784"></div>
+          <div class="field"><label>Telematics monthly</label><input type="number" id="cTMo" value="14"></div>
+          <div class="field"><label>Changeover cost Y1</label><input type="number" id="cChg" value="2000"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">ThermoKing unit costs</div>
+        <div class="input-grid">
+          <div class="field"><label>Capital cost ($)</label><input type="number" id="tkCap" value="24000"></div>
+          <div class="field"><label>Labor rate ($/hr)</label><input type="number" id="tkLab" value="120"></div>
+          <div class="field"><label>Fuel cost ($/hr)</label><input type="number" id="tkFuel" value="1.46"></div>
+          <div class="field"><label>Telematics capital</label><input type="number" id="tkTCap" value="0"></div>
+          <div class="field"><label>Telematics monthly</label><input type="number" id="tkTMo" value="10"></div>
+          <div class="field"><label>TK discount off list %</label><input type="number" id="tkDisc" value="30" min="0" max="100"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn" onclick="showPane('maint')">Next: edit maintenance schedule &rarr;</button>
+  </div>
+
+  <div id="pane-maint" class="pane">
+    <p class="cnote">Edit any field inline. SRT = standard repair time in hours (multiplied by labor rate for labor cost). Use the brand dropdown to flag Carrier-only or TK-only events. Add custom rows with the + button.</p>
+    <div style="overflow-x:auto">
+    <table class="mt" id="maintTable">
+      <colgroup>
+        <col style="width:165px"><col style="width:95px"><col style="width:95px">
+        <col style="width:85px"><col style="width:75px">
+        <col style="width:85px"><col style="width:75px">
+        <col style="width:28px">
+      </colgroup>
+      <thead><tr>
+        <th>Event</th><th>Interval (hrs)</th><th>Applies to</th>
+        <th>Carrier parts ($)</th><th>SRT C (hrs)</th>
+        <th>TK parts ($)</th><th>SRT TK (hrs)</th>
+        <th></th>
+      </tr></thead>
+      <tbody id="maintBody"></tbody>
+    </table>
+    </div>
+    <button class="btn-outline" onclick="addRow()"><span style="font-size:18px;line-height:1">+</span> Add custom maintenance event</button>
+    <div style="margin-top:16px"><button class="btn" onclick="showPane('summary')">Calculate TCO &rarr;</button></div>
+  </div>
+
+  <div id="pane-summary" class="pane">
+    <div id="winnerBanner" class="winner tie"></div>
+    <div class="grid3" id="kpiCards"></div>
+    <div class="sep"></div>
+    <div class="section-label">Cost breakdown per unit (full period)</div>
+    <div id="breakdownTable"></div>
+    <div class="sep"></div>
+    <div class="section-label">Fleet-level impact</div>
+    <div class="grid3" id="fleetCards"></div>
+  </div>
+
+  <div id="pane-yby" class="pane">
+    <div class="legend">
+      <span><span style="width:24px;height:3px;background:#2E75B6;display:inline-block;border-radius:2px"></span>Carrier cumulative</span>
+      <span><span style="width:24px;height:0;border-top:3px dashed #C55A11;display:inline-block"></span>ThermoKing cumulative</span>
+    </div>
+    <div class="chart-wrap"><canvas id="tcoChart" role="img" aria-label="Cumulative TCO comparison line chart for Carrier vs ThermoKing">Cumulative TCO comparison.</canvas></div>
+    <div style="overflow-x:auto" id="ybyTable"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var tcoChart=null;
+var MAINT=[
+  {name:'Service (Fuel, Air, Oil)',interval:3000,brand:'both',cParts:200,cSRT:2.5,tkParts:200,tkSRT:2.5},
+  {name:'All belts',interval:3000,brand:'both',cParts:73,cSRT:1.0,tkParts:120,tkSRT:1.0},
+  {name:'Water pump',interval:8000,brand:'both',cParts:289,cSRT:1.0,tkParts:225,tkSRT:1.0},
+  {name:'Gearbox',interval:15000,brand:'carrier',cParts:662,cSRT:2.0,tkParts:0,tkSRT:0},
+  {name:'Light bar',interval:6000,brand:'both',cParts:262,cSRT:0.5,tkParts:408,tkSRT:0.5},
+  {name:'Compressor seals',interval:8000,brand:'both',cParts:305,cSRT:3.0,tkParts:609,tkSRT:3.0},
+  {name:'Starter',interval:7000,brand:'both',cParts:577,cSRT:1.0,tkParts:372,tkSRT:1.0},
+  {name:'Alternator',interval:5000,brand:'both',cParts:296,cSRT:1.5,tkParts:418,tkSRT:1.5},
+  {name:'Nylon gear',interval:10000,brand:'carrier',cParts:211,cSRT:3.5,tkParts:0,tkSRT:0},
+  {name:'Exhaust manifold',interval:16000,brand:'carrier',cParts:255,cSRT:3.5,tkParts:0,tkSRT:0},
+  {name:'Head gaskets',interval:12000,brand:'tk',cParts:0,cSRT:0,tkParts:1540,tkSRT:0},
+  {name:'Fuel pump',interval:4000,brand:'tk',cParts:0,cSRT:0,tkParts:208,tkSRT:1.0},
+  {name:'Fuel solenoid',interval:1500,brand:'tk',cParts:0,cSRT:0,tkParts:186,tkSRT:0.5},
+  {name:'Generator',interval:15000,brand:'tk',cParts:0,cSRT:0,tkParts:4985,tkSRT:1.5},
+];
+function gv(id){return parseFloat(document.getElementById(id).value)||0;}
+function fmt(n){return '$'+Math.round(n).toLocaleString();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
+function buildMaintTable(){var tb=document.getElementById('maintBody');tb.innerHTML='';for(var i=0;i<MAINT.length;i++)tb.appendChild(makeRow(i));}
+function makeRow(i){
+  var m=MAINT[i];var cD=m.brand==='tk';var tD=m.brand==='carrier';
+  var tr=document.createElement('tr');tr.dataset.idx=i;
+  function inp(v,step,cb,dis){return '<input type="number" value="'+v+'" step="'+step+'" min="0" oninput="'+cb+'"'+(dis?' disabled':'')+' >';}
+  tr.innerHTML=
+    '<td><input type="text" value="'+esc(m.name)+'" oninput="MAINT['+i+'].name=this.value" style="width:155px"></td>'+
+    '<td>'+inp(m.interval,100,'MAINT['+i+'].interval=parseFloat(this.value)||0',false)+'</td>'+
+    '<td><select onchange="MAINT['+i+'].brand=this.value;rebuildRow('+i+',this.closest(\'tr\'))">'+
+      '<option value="both"'+(m.brand==='both'?' selected':'')+'>Both</option>'+
+      '<option value="carrier"'+(m.brand==='carrier'?' selected':'')+'>Carrier only</option>'+
+      '<option value="tk"'+(m.brand==='tk'?' selected':'')+'>TK only</option>'+
+    '</select></td>'+
+    '<td>'+inp(m.cParts,1,'MAINT['+i+'].cParts=parseFloat(this.value)||0',cD)+'</td>'+
+    '<td>'+inp(m.cSRT,0.25,'MAINT['+i+'].cSRT=parseFloat(this.value)||0',cD)+'</td>'+
+    '<td>'+inp(m.tkParts,1,'MAINT['+i+'].tkParts=parseFloat(this.value)||0',tD)+'</td>'+
+    '<td>'+inp(m.tkSRT,0.25,'MAINT['+i+'].tkSRT=parseFloat(this.value)||0',tD)+'</td>'+
+    '<td><button class="del-btn" onclick="delRow('+i+')" title="Remove">&times;</button></td>';
+  return tr;
+}
+function rebuildRow(i,tr){var f=makeRow(i);tr.parentNode.replaceChild(f,tr);}
+function addRow(){MAINT.push({name:'Custom event',interval:5000,brand:'both',cParts:0,cSRT:1.0,tkParts:0,tkSRT:1.0});document.getElementById('maintBody').appendChild(makeRow(MAINT.length-1));}
+function delRow(i){MAINT.splice(i,1);buildMaintTable();}
+function maintCostPerYear(brand,year,hpy,cLab,tkLab){
+  var total=year*hpy,prev=(year-1)*hpy,cost=0;
+  for(var i=0;i<MAINT.length;i++){
+    var m=MAINT[i];
+    if(brand==='carrier'&&m.brand==='tk')continue;
+    if(brand==='tk'&&m.brand==='carrier')continue;
+    if(!m.interval||m.interval<=0)continue;
+    var occ=Math.floor(total/m.interval)-Math.floor(prev/m.interval);
+    if(occ<=0)continue;
+    cost+=occ*((brand==='carrier'?m.cParts:m.tkParts)+(brand==='carrier'?m.cSRT:m.tkSRT)*(brand==='carrier'?cLab:tkLab));
+  }
+  return cost;
+}
+function calc(){
+  var fl=gv('fleetSize'),cpct=gv('carrierPct')/100,hpy=gv('hoursPerYear'),yrs=Math.round(gv('numYears'));
+  var cCap=gv('cCap'),cLab=gv('cLab'),cFuel=gv('cFuel'),cTCap=gv('cTCap'),cTMo=gv('cTMo'),cChg=gv('cChg');
+  var tkCap=gv('tkCap'),tkLab=gv('tkLab'),tkFuel=gv('tkFuel'),tkTCap=gv('tkTCap'),tkTMo=gv('tkTMo');
+  var cU=Math.round(fl*cpct),tkU=fl-cU,cRows=[],tkRows=[];
+  for(var y=1;y<=yrs;y++){
+    var cm=maintCostPerYear('carrier',y,hpy,cLab,tkLab);
+    var tkm=maintCostPerYear('tk',y,hpy,cLab,tkLab);
+    var cvChg=y===1?cChg:y===2?cChg*0.5:y===3?cChg*0.25:y===4?cChg*0.125:0;
+    cRows.push({y:y,maint:cm,chg:cvChg,total:cm+(y===1?cCap+cTCap:0)+cTMo*12+cFuel*hpy+cvChg});
+    tkRows.push({y:y,maint:tkm,chg:0,total:tkm+(y===1?tkCap+tkTCap:0)+tkTMo*12+tkFuel*hpy});
+  }
+  var cTCO=cRows.reduce(function(a,r){return a+r.total;},0);
+  var tkTCO=tkRows.reduce(function(a,r){return a+r.total;},0);
+  var diff=tkTCO-cTCO,w=diff>50?'carrier':diff<-50?'tk':'tie';
+  renderBanner(w,cTCO,tkTCO,yrs);
+  renderKPIs(cTCO,tkTCO,diff,cRows,tkRows,yrs);
+  renderBreakdown(cRows,tkRows,cCap,tkCap,cTCap,tkTCap,cTMo,tkTMo,cFuel,tkFuel,hpy,yrs);
+  renderFleet(cTCO,tkTCO,cU,tkU);
+  renderYbY(cRows,tkRows);
+}
+function renderBanner(w,cTCO,tkTCO,yrs){
+  var b=document.getElementById('winnerBanner'),sv=Math.abs(tkTCO-cTCO);
+  if(w==='carrier'){b.className='winner carrier';b.innerHTML='<div class="win-label">Lower '+yrs+'-year TCO per unit</div><div class="win-val win-carrier">Carrier saves '+fmt(sv)+'</div>';}
+  else if(w==='tk'){b.className='winner tk';b.innerHTML='<div class="win-label">Lower '+yrs+'-year TCO per unit</div><div class="win-val win-tk">ThermoKing saves '+fmt(sv)+'</div>';}
+  else{b.className='winner tie';b.innerHTML='<div class="win-label">'+yrs+'-year TCO per unit</div><div class="win-val win-tie">Effectively equal</div>';}
+}
+function renderKPIs(cTCO,tkTCO,diff,cRows,tkRows,yrs){
+  var cC=0,tkC=0,crossover='Never';
+  for(var y=0;y<cRows.length;y++){var pC=cC,pTK=tkC;cC+=cRows[y].total;tkC+=tkRows[y].total;
+    if(y>0&&((pTK-pC<=0&&tkC-cC>0)||(pTK-pC>=0&&tkC-cC<0))){crossover='Year '+(y+1);break;}}
+  var h='<div class="card blue"><div class="card-label">Carrier '+yrs+'-yr TCO</div><div class="card-val">'+fmt(cTCO)+'</div><div class="card-sub">'+fmt(cTCO/yrs)+' / yr avg</div></div>';
+  h+='<div class="card orange"><div class="card-label">ThermoKing '+yrs+'-yr TCO</div><div class="card-val">'+fmt(tkTCO)+'</div><div class="card-sub">'+fmt(tkTCO/yrs)+' / yr avg</div></div>';
+  h+='<div class="card green"><div class="card-label">Savings (lower TCO)</div><div class="card-val">'+fmt(Math.abs(diff))+'</div><div class="card-sub">Crossover: '+crossover+'</div></div>';
+  document.getElementById('kpiCards').innerHTML=h;
+}
+function renderBreakdown(cRows,tkRows,cCap,tkCap,cTCap,tkTCap,cTMo,tkTMo,cFuel,tkFuel,hpy,yrs){
+  var cM=cRows.reduce(function(a,r){return a+r.maint;},0),tkM=tkRows.reduce(function(a,r){return a+r.maint;},0);
+  var cF=cFuel*hpy*yrs,tkF=tkFuel*hpy*yrs,cT=cTCap+cTMo*12*yrs,tkT=tkTCap+tkTMo*12*yrs;
+  var cCO=cRows.reduce(function(a,r){return a+r.chg;},0);
+  var rows=[['Capital cost',fmt(cCap),fmt(tkCap)],['Maintenance (parts+labor)',fmt(cM),fmt(tkM)],['Fuel',fmt(cF),fmt(tkF)],['Telematics',fmt(cT),fmt(tkT)],['Changeover',fmt(cCO),'—'],
+    ['<strong>Total TCO</strong>','<strong>'+fmt(cCap+cM+cF+cT+cCO)+'</strong>','<strong>'+fmt(tkCap+tkM+tkF+tkT)+'</strong>']];
+  var h='<table><thead><tr><th>Component</th><th class="num">Carrier</th><th class="num">ThermoKing</th></tr></thead><tbody>';
+  for(var i=0;i<rows.length;i++)h+='<tr'+(i===rows.length-1?' class="hl"':'')+'><td>'+rows[i][0]+'</td><td class="num">'+rows[i][1]+'</td><td class="num">'+rows[i][2]+'</td></tr>';
+  document.getElementById('breakdownTable').innerHTML=h+'</tbody></table>';
+}
+function renderFleet(cTCO,tkTCO,cU,tkU){
+  var h='<div class="card"><div class="card-label">Carrier units</div><div class="card-val">'+cU.toLocaleString()+'</div><div class="card-sub">Fleet TCO: '+fmt(cTCO*cU)+'</div></div>';
+  h+='<div class="card"><div class="card-label">ThermoKing units</div><div class="card-val">'+tkU.toLocaleString()+'</div><div class="card-sub">Fleet TCO: '+fmt(tkTCO*tkU)+'</div></div>';
+  h+='<div class="card"><div class="card-label">Total fleet TCO</div><div class="card-val">'+fmt(cTCO*cU+tkTCO*tkU)+'</div><div class="card-sub">'+cU+' C + '+tkU+' TK units</div></div>';
+  document.getElementById('fleetCards').innerHTML=h;
+}
+function renderYbY(cRows,tkRows){
+  var cC=0,tkC=0,labels=[],cData=[],tkData=[];
+  var h='<table><thead><tr><th>Year</th><th class="num">Carrier annual</th><th class="num" style="background:#dbeafe">Carrier cumul.</th><th class="num">TK annual</th><th class="num" style="background:#fef3c7">TK cumul.</th><th>Leader</th></tr></thead><tbody>';
+  for(var y=0;y<cRows.length;y++){
+    cC+=cRows[y].total;tkC+=tkRows[y].total;
+    labels.push('Yr '+(y+1));cData.push(Math.round(cC));tkData.push(Math.round(tkC));
+    var leader=cC<tkC?'<span class="badge win">Carrier</span>':cC>tkC?'<span class="badge loss">TK</span>':'<span class="badge tie">Tied</span>';
+    h+='<tr><td>'+(y+1)+'</td><td class="num">'+fmt(cRows[y].total)+'</td><td class="num" style="background:#dbeafe">'+fmt(cC)+'</td><td class="num">'+fmt(tkRows[y].total)+'</td><td class="num" style="background:#fef3c7">'+fmt(tkC)+'</td><td>'+leader+'</td></tr>';
+  }
+  document.getElementById('ybyTable').innerHTML=h+'</tbody></table>';
+  if(tcoChart)tcoChart.destroy();
+  tcoChart=new Chart(document.getElementById('tcoChart'),{type:'line',
+    data:{labels:labels,datasets:[
+      {label:'Carrier',data:cData,borderColor:'#2E75B6',backgroundColor:'rgba(46,117,182,0.07)',tension:0.3,pointRadius:3,fill:true},
+      {label:'ThermoKing',data:tkData,borderColor:'#C55A11',backgroundColor:'rgba(197,90,17,0.07)',tension:0.3,pointRadius:3,borderDash:[5,3],fill:true}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:function(v){return '$'+Math.round(v/1000)+'k';}},grid:{color:'rgba(0,0,0,0.06)'}},x:{grid:{display:false}}}}
+  });
+}
+function showPane(name){
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('pane-'+name).classList.add('active');
+  var order=['inputs','maint','summary','yby'];
+  document.querySelectorAll('.tab')[order.indexOf(name)].classList.add('active');
+  if(name==='summary'||name==='yby')calc();
+}
+buildMaintTable();
+</script>
+</body>
+</html>
