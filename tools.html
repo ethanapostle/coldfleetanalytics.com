@@ -1,1 +1,1304 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maintenance Tools — Cold Fleet Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* ─── BRAND TOKENS (matches homepage) ─── */
+:root {
+  --green: #1a5c3a;
+  --green-dark: #0f3d26;
+  --green-light: #2a7a4f;
+  --green-pale: #a8d4bb;
+  --cream: #f7f4ef;
+  --cream-dark: #ede9e1;
+  --cream-mid: #e4dfd5;
+  --brown: #2c2820;
+  --brown-mid: #6e6459;
+  --brown-light: #9e9086;
+  --brown-faint: #c8c0b4;
+  --white: #ffffff;
+  --serif: 'Lora', Georgia, serif;
+  --sans: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+
+  /* Calculator internals — maps to brand palette */
+  --bg: var(--white);
+  --bg2: var(--cream);
+  --bg3: var(--cream-dark);
+  --border: var(--cream-mid);
+  --border2: #d4cfc8;
+  --text: var(--brown);
+  --text2: var(--brown-mid);
+  --text3: var(--brown-light);
+  --accent: var(--green);
+  --accent2: var(--green-dark);
+  --carrier: #1a5c3a;
+  --tk: #8b5e1a;
+  --green-calc: #1a5c3a;
+  --red: #b91c1c;
+  --amber: #92400e;
+  --font-head: var(--serif);
+  --font-body: var(--sans);
+  --font-mono: var(--mono);
+  --r: 6px;
+  --r2: 8px;
+  --r3: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; scroll-behavior: smooth; }
+body { background: var(--cream); color: var(--brown); font-family: var(--sans); line-height: 1.6; }
+
+/* ─── SITE NAV ─── */
+nav {
+  position: sticky;
+  top: 0; z-index: 200;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 56px;
+  height: 68px;
+  background: rgba(247,244,239,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--cream-mid);
+  box-shadow: 0 2px 24px rgba(44,40,32,0.06);
+}
+.logo {
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--brown);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  background: var(--green);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-mark svg { width: 16px; height: 16px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; }
+.logo span { color: var(--green); }
+.nav-center {
+  display: flex; gap: 36px;
+  font-size: 14px; color: var(--brown-mid);
+}
+.nav-center a {
+  color: var(--brown-mid); text-decoration: none;
+  transition: color 0.2s; position: relative;
+}
+.nav-center a.active, .nav-center a:hover { color: var(--brown); }
+.nav-center a.active::after {
+  content: ''; position: absolute;
+  bottom: -4px; left: 0; right: 0;
+  height: 2px; background: var(--green);
+  border-radius: 2px;
+}
+.nav-cta {
+  background: var(--green); color: white;
+  padding: 10px 22px; border-radius: 7px;
+  font-size: 14px; font-weight: 500;
+  border: none; cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.nav-cta:hover { background: var(--green-light); }
+
+/* ─── PAGE HERO ─── */
+.page-hero {
+  padding: 64px 56px 48px;
+  border-bottom: 1px solid var(--cream-mid);
+  background: var(--white);
+}
+.page-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--green); margin-bottom: 16px;
+}
+.page-eyebrow::before {
+  content: ''; display: block;
+  width: 20px; height: 1px; background: var(--green);
+}
+.page-hero h1 {
+  font-family: var(--serif);
+  font-size: 40px; font-weight: 600;
+  line-height: 1.1; letter-spacing: -1px;
+  color: var(--brown); margin-bottom: 12px;
+}
+.page-hero h1 em { font-style: italic; color: var(--green); }
+.page-hero p {
+  font-size: 16px; color: var(--brown-mid);
+  max-width: 560px; line-height: 1.8;
+}
+
+/* ─── TOOL CARDS ─── */
+.tools-nav {
+  padding: 32px 56px;
+  border-bottom: 1px solid var(--cream-mid);
+  background: var(--cream);
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+.tool-card {
+  background: var(--white);
+  border: 1px solid var(--cream-mid);
+  border-radius: 12px;
+  padding: 20px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: flex-start; gap: 14px;
+  min-width: 240px; flex: 1;
+}
+.tool-card:hover { border-color: var(--green); box-shadow: 0 2px 16px rgba(26,92,58,0.08); }
+.tool-card.active { border-color: var(--green); border-width: 2px; background: #f0f7f3; }
+.tool-icon {
+  width: 40px; height: 40px;
+  background: #e8f5ee; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.tool-card h3 { font-size: 15px; font-weight: 600; color: var(--brown); margin-bottom: 4px; }
+.tool-card p { font-size: 13px; color: var(--brown-mid); line-height: 1.6; }
+.tool-badge {
+  display: inline-block; margin-top: 6px;
+  font-size: 11px; font-weight: 500;
+  padding: 2px 10px; border-radius: 100px;
+  background: #e8f5ee; color: var(--green);
+}
+
+/* ─── CALCULATOR WRAPPER ─── */
+.calc-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 56px 80px;
+}
+
+/* ─── WELCOME SCREEN ─── */
+#welcomeScreen {
+  padding: 60px 0 40px;
+}
+.welcome-box {
+  background: var(--white);
+  border: 1px solid var(--cream-mid);
+  border-radius: 16px;
+  padding: 48px;
+  max-width: 480px;
+  box-shadow: 0 4px 32px rgba(44,40,32,0.06);
+}
+.welcome-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: .15em;
+  color: var(--green); text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.welcome-title {
+  font-family: var(--serif);
+  font-size: 34px; font-weight: 600;
+  line-height: 1.1; margin-bottom: 10px;
+  letter-spacing: -.5px; color: var(--brown);
+}
+.welcome-title span { color: var(--green); }
+.welcome-sub {
+  font-size: 14px; color: var(--brown-mid);
+  margin-bottom: 32px; line-height: 1.75;
+}
+.w-field { margin-bottom: 16px; }
+.w-field label {
+  display: block; font-family: var(--mono);
+  font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--brown-light);
+  margin-bottom: 6px;
+}
+.w-field input {
+  width: 100%; background: var(--cream);
+  border: 1px solid var(--cream-mid);
+  border-radius: 8px; padding: 12px 14px;
+  font-size: 14px; font-family: var(--sans);
+  color: var(--brown); outline: none;
+  transition: border-color .2s;
+}
+.w-field input:focus { border-color: var(--green); }
+.w-field input::placeholder { color: var(--brown-faint); }
+.w-btn {
+  width: 100%; padding: 14px;
+  background: var(--green); color: #fff;
+  border: none; border-radius: 8px;
+  font-family: var(--sans); font-size: 15px;
+  font-weight: 600; cursor: pointer;
+  transition: background .2s, transform .1s;
+}
+.w-btn:hover { background: var(--green-light); }
+.w-btn:active { transform: scale(.98); }
+.welcome-note {
+  font-size: 12px; color: var(--brown-faint);
+  text-align: center; margin-top: 14px;
+}
+
+/* ─── MAIN APP ─── */
+#mainApp { display: none; }
+
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--cream-mid);
+  padding: 0 0;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  margin: 32px 0 0;
+  border-radius: 12px 12px 0 0;
+  border: 1px solid var(--cream-mid);
+  padding: 0 20px;
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.topbar-logo {
+  font-family: var(--serif); font-size: 15px;
+  font-weight: 600; color: var(--brown);
+}
+.topbar-logo span { color: var(--green); }
+.topbar-divider { width: 1px; height: 20px; background: var(--cream-mid); }
+.topbar-fleet { font-family: var(--mono); font-size: 11px; color: var(--brown-mid); }
+.topbar-user { font-size: 11px; color: var(--brown-light); }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.tb-btn {
+  background: transparent; border: 1px solid var(--cream-mid);
+  border-radius: 6px; padding: 5px 12px;
+  font-size: 12px; font-family: var(--sans);
+  color: var(--brown-mid); cursor: pointer;
+  transition: all .2s; display: inline-flex; align-items: center; gap: 5px;
+}
+.tb-btn:hover { border-color: var(--green); color: var(--green); }
+
+/* TABS */
+.tabs-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--cream-mid);
+  border-left: 1px solid var(--cream-mid);
+  border-right: 1px solid var(--cream-mid);
+  padding: 0 20px;
+  display: flex; gap: 2px; overflow-x: auto;
+}
+.tabs-bar::-webkit-scrollbar { height: 0; }
+.tab {
+  padding: 13px 16px; font-size: 13px; font-weight: 500;
+  color: var(--brown-light); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap; transition: color .2s, border-color .2s;
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--sans);
+}
+.tab:hover:not(.active) { color: var(--brown-mid); }
+.tab.active { color: var(--brown); border-bottom-color: var(--green); }
+.tab.tnew { color: var(--green); opacity: .75; }
+.tab.tnew.active { opacity: 1; }
+.tab.task { color: var(--green-dark); opacity: .75; }
+.tab.task.active { opacity: 1; border-bottom-color: var(--green-dark); }
+.tab i { font-size: 13px; }
+
+/* CONTENT */
+.content {
+  padding: 28px;
+  background: var(--white);
+  border: 1px solid var(--cream-mid);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+}
+.pane { display: none; }
+.pane.active { display: block; }
+
+/* SECTION LABEL */
+.sec {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--brown-light); margin-bottom: 10px; margin-top: 22px;
+}
+.sec:first-child { margin-top: 0; }
+
+/* CARDS */
+.card {
+  background: var(--cream); border: 1px solid var(--cream-mid);
+  border-radius: var(--r3); padding: 18px 20px;
+}
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+.grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+
+/* KPI */
+.kpi {
+  background: var(--white); border: 1px solid var(--cream-mid);
+  border-radius: var(--r2); padding: 14px 16px;
+}
+.kpi-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--brown-light); margin-bottom: 6px;
+}
+.kpi-val {
+  font-family: var(--serif); font-size: 22px;
+  font-weight: 600; letter-spacing: -.3px; color: var(--brown);
+}
+.kpi-sub { font-size: 11px; color: var(--brown-mid); margin-top: 3px; }
+
+/* INPUTS */
+.input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--brown-light);
+}
+input[type=number], input[type=text], select, textarea {
+  background: var(--white); border: 1px solid var(--cream-mid);
+  border-radius: var(--r); padding: 8px 10px;
+  font-size: 13px; font-family: var(--sans);
+  color: var(--brown); width: 100%; outline: none;
+  transition: border-color .2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--green); }
+input::placeholder, textarea::placeholder { color: var(--brown-faint); }
+select option { background: var(--white); }
+
+/* BTNS */
+.btn {
+  padding: 8px 16px; border-radius: var(--r);
+  font-size: 13px; font-family: var(--sans); font-weight: 500;
+  cursor: pointer; display: inline-flex; align-items: center;
+  gap: 6px; transition: all .2s;
+  border: 1px solid var(--cream-mid);
+  background: var(--white); color: var(--brown-mid);
+}
+.btn:hover { border-color: var(--brown-light); color: var(--brown); }
+.btn-primary {
+  background: var(--green); color: #fff; border: none;
+}
+.btn-primary:hover { background: var(--green-light); }
+.btn-green {
+  background: rgba(26,92,58,.08); color: var(--green);
+  border: 1px solid rgba(26,92,58,.2);
+}
+.btn-green:hover { background: rgba(26,92,58,.14); }
+.btn-danger {
+  background: rgba(185,28,28,.07); color: var(--red);
+  border: 1px solid rgba(185,28,28,.15);
+}
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+
+/* TABLE */
+.sep { border: none; border-top: 1px solid var(--cream-mid); margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  text-align: left; padding: 7px 10px;
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--brown-light); border-bottom: 1px solid var(--cream-mid);
+  background: var(--cream); white-space: nowrap;
+}
+tbody td {
+  padding: 7px 10px; border-bottom: 1px solid var(--cream-mid);
+  vertical-align: middle; color: var(--brown);
+}
+tbody tr:hover { background: var(--cream); }
+tbody tr:last-child td { border-bottom: none; }
+.num { text-align: right; font-family: var(--mono); }
+.hl { background: var(--cream) !important; font-weight: 600; }
+.mt input[type=number], .mt input[type=text] { padding: 5px 7px; font-size: 11px; }
+.mt select { padding: 5px 6px; font-size: 11px; }
+.mt input:disabled, .mt select:disabled { opacity: .25; cursor: not-allowed; }
+.del-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--brown-light); font-size: 15px; padding: 0 3px;
+  transition: color .15s;
+}
+.del-btn:hover { color: var(--red); }
+
+/* BADGES */
+.badge {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  font-family: var(--mono); padding: 2px 7px; border-radius: 4px;
+  letter-spacing: .04em;
+}
+.b-carrier { background: rgba(26,92,58,.1); color: var(--green); border: 1px solid rgba(26,92,58,.2); }
+.b-tk { background: rgba(139,94,26,.1); color: var(--tk); border: 1px solid rgba(139,94,26,.2); }
+.b-win { background: rgba(26,92,58,.1); color: var(--green); }
+.b-loss { background: rgba(185,28,28,.08); color: var(--red); }
+.b-tie { background: var(--cream); color: var(--brown-light); }
+.b-warn { background: rgba(146,64,14,.08); color: var(--amber); }
+.b-danger { background: rgba(185,28,28,.08); color: var(--red); }
+.b-info { background: rgba(26,92,58,.1); color: var(--green); }
+.b-real { background: rgba(26,92,58,.1); color: var(--green); }
+.b-oem { background: var(--cream); color: var(--brown-light); border: 1px solid var(--cream-mid); }
+
+/* WINNER BANNER */
+.winner { border-radius: var(--r2); padding: 14px 18px; margin-bottom: 16px; border: 1px solid; }
+.winner.carrier { background: rgba(26,92,58,.06); border-color: rgba(26,92,58,.25); }
+.winner.tk { background: rgba(139,94,26,.06); border-color: rgba(139,94,26,.25); }
+.winner.tie { background: var(--cream); border-color: var(--cream-mid); }
+.win-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--brown-light); margin-bottom: 4px;
+}
+.win-val { font-family: var(--serif); font-size: 20px; font-weight: 600; }
+.win-c { color: var(--green); }
+.win-tk { color: var(--tk); }
+.win-tie { color: var(--brown-mid); }
+
+/* UPLOAD */
+.drop-zone {
+  border: 1px dashed var(--cream-mid); border-radius: var(--r3);
+  padding: 36px 24px; text-align: center; cursor: pointer;
+  transition: all .25s; background: var(--cream);
+}
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--green); background: rgba(26,92,58,.04);
+}
+.drop-zone-icon { font-size: 32px; color: var(--brown-faint); margin-bottom: 10px; display: block; }
+.drop-zone p { font-size: 13px; color: var(--brown-mid); }
+.drop-zone .hint { font-size: 11px; color: var(--brown-light); margin-top: 4px; font-family: var(--mono); }
+
+/* MODE CARDS */
+.mode-card {
+  border: 1px solid var(--cream-mid); border-radius: var(--r2);
+  padding: 14px 16px; cursor: pointer; margin-bottom: 8px;
+  display: flex; gap: 14px; align-items: flex-start; transition: all .2s;
+}
+.mode-card:hover { border-color: var(--brown-light); background: var(--cream); }
+.mode-card.selected { border-color: var(--green); background: rgba(26,92,58,.04); }
+.mode-icon { font-size: 20px; margin-top: 2px; min-width: 22px; text-align: center; }
+.mode-title { font-family: var(--serif); font-size: 14px; font-weight: 600; margin-bottom: 3px; color: var(--brown); }
+.mode-desc { font-size: 12px; color: var(--brown-mid); line-height: 1.55; }
+.mode-tag {
+  display: inline-block; font-size: 10px; font-family: var(--mono);
+  letter-spacing: .06em; padding: 2px 8px; border-radius: 4px; margin-top: 5px;
+}
+.tag-fast { background: rgba(26,92,58,.1); color: var(--green); }
+.tag-smart { background: rgba(26,92,58,.08); color: var(--green); }
+.tag-full { background: var(--cream); color: var(--brown-light); border: 1px solid var(--cream-mid); }
+
+/* SUMMARY BUBBLE */
+.summary-bubble {
+  background: var(--cream); border: 1px solid var(--cream-mid);
+  border-radius: var(--r2); padding: 14px 18px;
+  font-size: 13px; line-height: 1.7; margin-bottom: 14px;
+}
+.stat-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--white); border: 1px solid var(--cream-mid);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 11px; font-family: var(--mono); margin: 2px;
+}
+
+/* THRESHOLD */
+.threshold-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--cream);
+  border-radius: var(--r2); margin-bottom: 12px;
+  font-size: 11px; flex-wrap: wrap; border: 1px solid var(--cream-mid);
+}
+.threshold-row input[type=number] { width: 70px; }
+.threshold-row input[type=range] { flex: 1; accent-color: var(--green); }
+
+/* PROGRESS */
+.prog { height: 3px; background: var(--cream-mid); border-radius: 2px; overflow: hidden; flex: 1; }
+.prog-fill { height: 100%; border-radius: 2px; background: var(--green); }
+.prog-fill.low { background: var(--red); }
+.prog-fill.mid { background: var(--amber); }
+
+/* INSIGHTS */
+.ins-card {
+  border: 1px solid var(--cream-mid); border-radius: var(--r2);
+  padding: 12px 14px; margin-bottom: 8px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.ins-icon { font-size: 16px; margin-top: 1px; min-width: 18px; }
+.ins-icon.warn { color: var(--amber); }
+.ins-icon.good { color: var(--green); }
+.ins-icon.info { color: var(--green); }
+.ins-icon.danger { color: var(--red); }
+.ins-body p { font-size: 12px; line-height: 1.55; color: var(--brown); }
+.ins-body small { font-size: 11px; color: var(--brown-light); font-family: var(--mono); }
+
+/* UNIT ANALYSIS */
+.unit-row {
+  border: 1px solid var(--cream-mid); border-radius: var(--r2);
+  padding: 10px 14px; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; transition: all .2s;
+}
+.unit-row:hover { border-color: var(--brown-light); }
+.unit-row.problem { border-color: rgba(185,28,28,.3); background: rgba(185,28,28,.03); }
+.unit-row.elevated { border-color: rgba(146,64,14,.25); background: rgba(146,64,14,.03); }
+.unit-id-block { min-width: 100px; }
+.unit-id { font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--brown); }
+.unit-serial { font-family: var(--mono); font-size: 10px; color: var(--brown-light); margin-top: 1px; }
+.unit-bar-wrap { flex: 1; }
+.unit-bar { height: 5px; border-radius: 3px; background: var(--cream-mid); overflow: hidden; }
+.unit-bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+.unit-cost { font-family: var(--mono); font-size: 13px; font-weight: 500; min-width: 70px; text-align: right; color: var(--brown); }
+.unit-detail {
+  display: none; border: 1px solid var(--cream-mid); border-top: none;
+  border-radius: 0 0 var(--r2) var(--r2); padding: 14px;
+  background: var(--cream); margin-top: -6px; margin-bottom: 6px;
+}
+
+/* DEALER */
+.dealer-card { border: 1px solid var(--cream-mid); border-radius: var(--r2); padding: 14px 16px; transition: border-color .2s; }
+.dealer-name { font-family: var(--serif); font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--brown); }
+.dealer-stat { display: flex; justify-content: space-between; font-size: 11px; color: var(--brown-mid); margin-bottom: 4px; }
+.dealer-stat span:last-child { font-weight: 500; color: var(--brown); font-family: var(--mono); }
+
+/* BAR CHART */
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 11px; }
+.bar-label { width: 160px; color: var(--brown-mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; height: 7px; background: var(--cream-mid); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+.bar-val { width: 55px; text-align: right; font-family: var(--mono); font-size: 11px; color: var(--brown-mid); }
+
+/* MISC */
+.misc-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-bottom: 1px solid var(--cream-mid); font-size: 11px; }
+.misc-item:last-child { border-bottom: none; }
+.misc-cost { font-family: var(--mono); font-weight: 500; margin-left: auto; margin-right: 8px; color: var(--brown); }
+
+/* CLARIFY */
+.clarify-box {
+  border: 1px solid rgba(26,92,58,.25); background: rgba(26,92,58,.04);
+  border-radius: var(--r2); padding: 14px 16px; margin-top: 12px;
+}
+
+/* CHART */
+.chart-wrap { position: relative; width: 100%; height: 250px; margin: 10px 0; }
+.legend { display: flex; gap: 18px; font-size: 11px; color: var(--brown-mid); margin-bottom: 6px; font-family: var(--mono); }
+.legend span { display: flex; align-items: center; gap: 6px; }
+
+/* CHAT */
+.chat-outer { border: 1px solid var(--cream-mid); border-radius: var(--r3); overflow: hidden; }
+.chat-messages {
+  padding: 16px; min-height: 180px; max-height: 380px;
+  overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+  background: var(--cream);
+}
+.msg-wrap-user { display: flex; flex-direction: column; align-items: flex-end; }
+.msg-wrap-claude { display: flex; flex-direction: column; align-items: flex-start; }
+.msg-meta { font-family: var(--mono); font-size: 10px; color: var(--brown-light); margin-bottom: 3px; letter-spacing: .06em; }
+.msg { max-width: 86%; font-size: 13px; line-height: 1.65; padding: 10px 14px; border-radius: var(--r2); }
+.msg.user { background: var(--white); border: 1px solid var(--cream-mid); border-radius: var(--r2) var(--r2) 4px var(--r2); }
+.msg.claude { background: rgba(26,92,58,.07); border: 1px solid rgba(26,92,58,.18); color: var(--brown); border-radius: var(--r2) var(--r2) var(--r2) 4px; }
+.chat-input-row { padding: 10px 12px; border-top: 1px solid var(--cream-mid); display: flex; gap: 8px; background: var(--white); }
+.chat-input-row textarea {
+  flex: 1; resize: none; height: 38px; font-size: 13px;
+  border: 1px solid var(--cream-mid); border-radius: var(--r);
+  padding: 8px 10px; background: var(--cream);
+  color: var(--brown); font-family: var(--sans); line-height: 1.4;
+}
+.chat-note { font-family: var(--mono); font-size: 10px; color: var(--brown-light); text-align: center; padding: 6px 12px 10px; background: var(--cream); border-top: 1px solid var(--cream-mid); letter-spacing: .05em; }
+.typing { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+.typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%,80%,100% { opacity: .15; } 40% { opacity: 1; } }
+.suggested-q {
+  display: inline-block; font-size: 11px; font-family: var(--mono);
+  padding: 5px 12px; border: 1px solid var(--cream-mid);
+  border-radius: 20px; cursor: pointer; margin: 3px;
+  color: var(--brown-mid); background: var(--white);
+  transition: all .2s; letter-spacing: .03em;
+}
+.suggested-q:hover { border-color: var(--green); color: var(--green); }
+
+/* UPLOAD HISTORY */
+.upload-file-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-bottom: 1px solid var(--cream-mid); font-size: 11px; }
+.upload-file-item:last-child { border-bottom: none; }
+.upload-file-item i { font-size: 15px; color: var(--brown-light); }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--brown-light); }
+.empty-state i { font-size: 36px; display: block; margin-bottom: 12px; opacity: .4; }
+.empty-state p { font-size: 13px; line-height: 1.6; }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.pane.active { animation: fadeUp .25s ease; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--cream-mid); border-radius: 3px; }
+
+/* RESPONSIVE */
+@media(max-width:640px) {
+  .calc-wrap { padding: 0 16px 60px; }
+  nav { padding: 0 16px; }
+  .page-hero { padding: 40px 16px 32px; }
+  .tools-nav { padding: 16px; }
+  .content { padding: 16px; }
+  .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+  .input-grid { grid-template-columns: 1fr; }
+  .nav-center { display: none; }
+}
+
+/* FOOTER */
+footer {
+  background: var(--cream); border-top: 1px solid var(--cream-mid);
+  padding: 40px 56px; text-align: center;
+}
+footer p { font-size: 13px; color: var(--brown-faint); }
+footer a { color: var(--brown-mid); text-decoration: none; }
+footer a:hover { color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- SITE NAV -->
+<nav>
+  <a class="logo" href="index.html">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16"><polyline points="2,12 5,7 8,10 11,4 14,6"/></svg>
+    </div>
+    Cold<span>Fleet</span> Analytics
+  </a>
+  <div class="nav-center">
+    <a href="index.html#how">How it works</a>
+    <a href="index.html#services">Services</a>
+    <a href="tools.html" class="active">Maintenance Tools</a>
+    <a href="index.html#about">About</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+  <a class="nav-cta" href="index.html#contact">Let's talk</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-eyebrow">Maintenance Tools</div>
+  <h1>Fleet tools, <em>built for operators.</em></h1>
+  <p>Free calculators and analysis tools for fleet maintenance managers. No account required — your data stays in your browser.</p>
+</div>
+
+<!-- TOOL SELECTOR -->
+<div class="tools-nav">
+  <div class="tool-card active" onclick="selectTool(this)">
+    <div class="tool-icon">⚖️</div>
+    <div>
+      <h3>Reefer TCO Calculator</h3>
+      <p>Compare Carrier vs ThermoKing total cost of ownership over your fleet's lifecycle.</p>
+      <span class="tool-badge">Free · No signup</span>
+    </div>
+  </div>
+  <div class="tool-card" style="opacity:0.5;cursor:default;">
+    <div class="tool-icon">📊</div>
+    <div>
+      <h3>Cost Attribution Model</h3>
+      <p>Break down maintenance spend by asset, component, and event type.</p>
+      <span class="tool-badge" style="background:#f0ebe4;color:var(--brown-light)">Coming soon</span>
+    </div>
+  </div>
+  <div class="tool-card" style="opacity:0.5;cursor:default;">
+    <div class="tool-icon">🔮</div>
+    <div>
+      <h3>Failure Prediction Score</h3>
+      <p>Estimate remaining useful life and failure probability for key components.</p>
+      <span class="tool-badge" style="background:#f0ebe4;color:var(--brown-light)">Coming soon</span>
+    </div>
+  </div>
+</div>
+
+<!-- CALCULATOR -->
+<div class="calc-wrap">
+
+  <!-- WELCOME -->
+  <div id="welcomeScreen">
+    <div class="welcome-box">
+      <div class="welcome-eyebrow">Fleet Lifecycle Intelligence</div>
+      <h2 class="welcome-title">Reefer TCO<br><span>Calculator</span></h2>
+      <p class="welcome-sub">Compare Carrier vs ThermoKing total cost of ownership with your real invoice data. Upload invoices, get AI-powered insights, ask questions in plain English.</p>
+      <div class="w-field"><label>Fleet name</label><input type="text" id="fleetName" placeholder="e.g. Pauls Transport" autocomplete="off"></div>
+      <div class="w-field"><label>Your name</label><input type="text" id="userName" placeholder="e.g. Jamie Smith" autocomplete="off"></div>
+      <button class="w-btn" onclick="startApp()">Get started →</button>
+      <p class="welcome-note">No account needed · Your data stays private</p>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-logo">Fleet<span>TCO</span></div>
+        <div class="topbar-divider"></div>
+        <div>
+          <div class="topbar-fleet" id="topFleet"></div>
+          <div class="topbar-user" id="topUser"></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="tb-btn" onclick="resetApp()"><i class="ti ti-logout"></i> Switch fleet</button>
+      </div>
+    </div>
+
+    <div class="tabs-bar">
+      <div class="tab active" onclick="showTab('inputs')"><i class="ti ti-settings-2"></i> Fleet inputs</div>
+      <div class="tab" onclick="showTab('maint')"><i class="ti ti-tool"></i> Maintenance</div>
+      <div class="tab" onclick="showTab('summary')"><i class="ti ti-chart-bar"></i> TCO summary</div>
+      <div class="tab" onclick="showTab('yby')"><i class="ti ti-timeline"></i> Year-by-year</div>
+      <div class="tab tnew" onclick="showTab('upload')"><i class="ti ti-upload"></i> Upload data</div>
+      <div class="tab tnew" onclick="showTab('insights')"><i class="ti ti-bulb"></i> Insights</div>
+      <div class="tab task" onclick="showTab('ask')"><i class="ti ti-message-2"></i> Ask Claude</div>
+    </div>
+
+    <div class="content">
+
+      <!-- FLEET INPUTS -->
+      <div id="pane-inputs" class="pane active">
+        <div class="grid2">
+          <div class="card">
+            <div class="sec">Fleet &amp; operations</div>
+            <div class="input-grid">
+              <div class="field"><label>Fleet size (units)</label><input type="number" id="fleetSize" value="1400" min="1"></div>
+              <div class="field"><label>Carrier % of fleet</label><input type="number" id="carrierPct" value="60" min="0" max="100"></div>
+              <div class="field"><label>Avg hours / year</label><input type="number" id="hoursPerYear" value="2000" min="100"></div>
+              <div class="field"><label>Analysis period (yrs)</label><input type="number" id="numYears" value="15" min="1" max="20"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="sec">Carrier unit costs</div>
+            <div class="input-grid">
+              <div class="field"><label>Capital cost ($)</label><input type="number" id="cCap" value="26000"></div>
+              <div class="field"><label>Labor rate ($/hr)</label><input type="number" id="cLab" value="100"></div>
+              <div class="field"><label>Fuel cost ($/hr)</label><input type="number" id="cFuel" value="1.32"></div>
+              <div class="field"><label>Telematics capital ($)</label><input type="number" id="cTCap" value="784"></div>
+              <div class="field"><label>Telematics monthly ($)</label><input type="number" id="cTMo" value="14"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="sec">ThermoKing unit costs</div>
+            <div class="input-grid">
+              <div class="field"><label>Capital cost ($)</label><input type="number" id="tkCap" value="24000"></div>
+              <div class="field"><label>Labor rate ($/hr)</label><input type="number" id="tkLab" value="120"></div>
+              <div class="field"><label>Fuel cost ($/hr)</label><input type="number" id="tkFuel" value="1.46"></div>
+              <div class="field"><label>Telematics capital ($)</label><input type="number" id="tkTCap" value="0"></div>
+              <div class="field"><label>Telematics monthly ($)</label><input type="number" id="tkTMo" value="10"></div>
+              <div class="field"><label>TK discount off list %</label><input type="number" id="tkDisc" value="30" min="0" max="100"></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="showTab('maint')"><i class="ti ti-arrow-right"></i> Next: maintenance schedule</button>
+      </div>
+
+      <!-- MAINTENANCE -->
+      <div id="pane-maint" class="pane">
+        <p style="font-size:11px;color:var(--brown-light);margin-bottom:12px;font-family:var(--mono)">Edit inline · SRT = standard repair time (hrs) × labor rate · brand dropdown disables irrelevant fields</p>
+        <div style="overflow-x:auto">
+        <table style="table-layout:fixed;width:100%;min-width:700px" id="maintTable">
+          <colgroup><col style="width:160px"><col style="width:90px"><col style="width:95px"><col style="width:88px"><col style="width:72px"><col style="width:84px"><col style="width:72px"><col style="width:26px"></colgroup>
+          <thead><tr><th>Event</th><th>Interval (hrs)</th><th>Applies to</th><th>Carrier parts ($)</th><th>SRT C (hrs)</th><th>TK parts ($)</th><th>SRT TK (hrs)</th><th></th></tr></thead>
+          <tbody id="maintBody"></tbody>
+        </table>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="addMaintRow()"><i class="ti ti-plus"></i> Add event</button>
+          <button class="btn" onclick="showTab('inputs')"><i class="ti ti-arrow-left"></i> Back</button>
+          <button class="btn btn-primary" onclick="showTab('summary')"><i class="ti ti-chart-bar"></i> Calculate TCO</button>
+        </div>
+      </div>
+
+      <!-- TCO SUMMARY -->
+      <div id="pane-summary" class="pane">
+        <div id="winnerBanner" class="winner tie"></div>
+        <div class="grid3" id="kpiCards"></div>
+        <div class="sep"></div>
+        <div class="sec">Cost breakdown per unit — full period</div>
+        <div id="breakdownTable" style="overflow-x:auto"></div>
+        <div class="sep"></div>
+        <div class="sec">Fleet-level totals</div>
+        <div class="grid3" id="fleetCards"></div>
+      </div>
+
+      <!-- YEAR BY YEAR -->
+      <div id="pane-yby" class="pane">
+        <div class="legend">
+          <span><span style="width:22px;height:2px;background:var(--carrier);display:inline-block;border-radius:2px"></span>Carrier cumulative</span>
+          <span><span style="width:22px;height:0;border-top:2px dashed var(--tk);display:inline-block"></span>ThermoKing cumulative</span>
+        </div>
+        <div class="chart-wrap"><canvas id="tcoChart" aria-label="Cumulative TCO comparison"></canvas></div>
+        <div style="overflow-x:auto;margin-top:8px" id="ybyTable"></div>
+      </div>
+
+      <!-- UPLOAD -->
+      <div id="pane-upload" class="pane">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
+          <i class="ti ti-cloud-upload drop-zone-icon"></i>
+          <p>Drop invoices, spreadsheets, scanned PDFs — anything</p>
+          <p class="hint">PDF · Excel · CSV · images · plain text</p>
+          <div style="margin-top:14px"><button class="btn btn-sm" onclick="event.stopPropagation();document.getElementById('fileInput').click()"><i class="ti ti-folder-open"></i> Browse files</button></div>
+          <input type="file" id="fileInput" multiple accept=".pdf,.xlsx,.xls,.csv,.txt,.png,.jpg,.jpeg" style="display:none" onchange="handleFiles(this.files)">
+        </div>
+        <div id="uploadProcessing" style="display:none">
+          <div class="sep"></div>
+          <div class="summary-bubble" id="claudeSummary"></div>
+          <div class="sec">How do you want to process this data?</div>
+          <div class="mode-card selected" id="mode-auto" onclick="selectMode('auto')">
+            <div class="mode-icon" style="color:var(--green)"><i class="ti ti-bolt"></i></div>
+            <div><div class="mode-title">Just decide for me</div><div class="mode-desc">Claude maps everything above 70% confidence, auto-commits, drops the rest to misc. You get a plain-English summary — no line-by-line review.</div><span class="mode-tag tag-fast">Fastest</span></div>
+          </div>
+          <div class="mode-card" id="mode-extremes" onclick="selectMode('extremes')">
+            <div class="mode-icon" style="color:var(--green)"><i class="ti ti-adjustments-horizontal"></i></div>
+            <div><div class="mode-title">Show me the extremities</div><div class="mode-desc">Auto-commits everything routine. Only surfaces high-cost outliers, low-confidence items, and conflicts with existing data. You set the threshold.</div><span class="mode-tag tag-smart">Recommended</span></div>
+          </div>
+          <div class="mode-card" id="mode-full" onclick="selectMode('full')">
+            <div class="mode-icon" style="color:var(--brown-light)"><i class="ti ti-list-check"></i></div>
+            <div><div class="mode-title">Let me review everything</div><div class="mode-desc">Every extracted line item shown for confirmation before anything commits. Full control — takes the most time on large datasets.</div><span class="mode-tag tag-full">Most thorough</span></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" onclick="cancelUpload()"><i class="ti ti-x"></i> Cancel</button>
+            <button class="btn btn-primary" onclick="processUpload()"><i class="ti ti-arrow-right"></i> Continue</button>
+          </div>
+        </div>
+        <div id="uploadReview" style="display:none"><div id="reviewContent"></div></div>
+        <div id="uploadHistory" style="display:none">
+          <div class="sep"></div>
+          <div class="sec">Upload history</div>
+          <div id="uploadHistoryList" style="border:1px solid var(--cream-mid);border-radius:var(--r2);overflow:hidden;background:var(--white)"></div>
+        </div>
+      </div>
+
+      <!-- INSIGHTS -->
+      <div id="pane-insights" class="pane">
+        <div class="grid4" id="insightKpis"></div>
+        <div class="sec">Trends &amp; things worth discussing</div>
+        <div id="insightTrends"></div>
+        <div class="sep"></div>
+        <div class="sec">Unit analysis — asset &amp; serial level</div>
+        <p style="font-size:12px;color:var(--brown-mid);margin-bottom:10px">Units ranked by total recorded spend. Click any row to expand. Problem units sit more than 1 standard deviation above fleet average.</p>
+        <div id="unitAnalysis"></div>
+        <div class="sep"></div>
+        <div class="sec">Dealer comparison — same job, different price</div>
+        <div id="dealerComparison"></div>
+        <div class="sep"></div>
+        <div class="sec">Cost by event — where your money goes</div>
+        <div id="eventBars"></div>
+        <div class="sep"></div>
+        <div class="sec">Ask Claude about these insights</div>
+        <div style="margin-bottom:10px" id="insightSuggested"></div>
+        <div id="insightChatWrap"></div>
+      </div>
+
+      <!-- ASK CLAUDE -->
+      <div id="pane-ask" class="pane">
+        <p style="font-size:13px;color:var(--brown-mid);margin-bottom:14px">Ask anything about your fleet costs. Claude answers using your uploaded data and calculator inputs — not generic advice.</p>
+        <div style="margin-bottom:12px" id="askSuggested"></div>
+        <div id="askChatWrap"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /calc-wrap -->
+
+<!-- FOOTER -->
+<footer>
+  <p><a href="index.html">← Back to Cold Fleet Analytics</a> &nbsp;·&nbsp; <a href="index.html#contact">hello@coldfleetanalytics.com</a> &nbsp;·&nbsp; © 2024 Cold Fleet Analytics</p>
+</footer>
+
+<script>
+/* ─── TOOL SELECTOR ─── */
+function selectTool(el) {
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ─── CALCULATOR LOGIC (unchanged from original) ─── */
+var APP={fleetName:'',userName:'',mode:'auto',uploads:[],committed:false};
+
+var MAINT=[
+  {name:'Service (Fuel, Air, Oil)',interval:3000,brand:'both',cParts:200,cSRT:2.5,tkParts:200,tkSRT:2.5},
+  {name:'All belts',interval:3000,brand:'both',cParts:73,cSRT:1.0,tkParts:120,tkSRT:1.0},
+  {name:'Water pump',interval:8000,brand:'both',cParts:289,cSRT:1.0,tkParts:225,tkSRT:1.0},
+  {name:'Gearbox',interval:15000,brand:'carrier',cParts:662,cSRT:2.0,tkParts:0,tkSRT:0},
+  {name:'Light bar',interval:6000,brand:'both',cParts:262,cSRT:0.5,tkParts:408,tkSRT:0.5},
+  {name:'Compressor seals',interval:8000,brand:'both',cParts:305,cSRT:3.0,tkParts:609,tkSRT:3.0},
+  {name:'Starter',interval:7000,brand:'both',cParts:577,cSRT:1.0,tkParts:372,tkSRT:1.0},
+  {name:'Alternator',interval:10000,brand:'both',cParts:460,cSRT:1.0,tkParts:350,tkSRT:1.0},
+  {name:'Head gaskets',interval:12000,brand:'both',cParts:385,cSRT:4.0,tkParts:540,tkSRT:4.0},
+  {name:'Generator (TK only)',interval:20000,brand:'tk',cParts:0,cSRT:0,tkParts:4985,tkSRT:6.0},
+  {name:'Fuel solenoid',interval:9000,brand:'both',cParts:180,cSRT:0.5,tkParts:210,tkSRT:0.5},
+  {name:'Evap coil',interval:18000,brand:'both',cParts:920,cSRT:3.5,tkParts:870,tkSRT:3.5}
+];
+
+var UNITS=[
+  {id:'A-3302',serial:'TK-SN-330214',brand:'tk',cost:15840,events:[{name:'Generator replacement',cost:4985,date:'Jan 2024'},{name:'Head gaskets',cost:1540,date:'Mar 2024'},{name:'Service (×3)',cost:600,date:'Various'},{name:'All belts (×2)',cost:480,date:'Various'},{name:'Compressor seals',cost:609,date:'Nov 2023'},{name:'Fuel solenoid (×2)',cost:420,date:'Various'},{name:'Misc',cost:7206,date:'Various'}]},
+  {id:'A-4821',serial:'C-SN-482109',brand:'carrier',cost:18420,events:[{name:'Compressor seals (×3)',cost:1236,date:'Multiple'},{name:'Alternator (×2)',cost:920,date:'Multiple'},{name:'Service (×4)',cost:800,date:'Various'},{name:'All belts (×3)',cost:219,date:'Various'},{name:'Starter',cost:577,date:'Aug 2023'},{name:'Misc',cost:14668,date:'Various'}]},
+  {id:'A-5501',serial:'C-SN-550187',brand:'carrier',cost:11200,events:[{name:'Alternator (×2)',cost:920,date:'Multiple'},{name:'Service (×3)',cost:600,date:'Various'},{name:'Compressor seals',cost:305,date:'Jul 2023'},{name:'Misc',cost:9375,date:'Various'}]},
+  {id:'A-1105',serial:'TK-SN-110523',brand:'tk',cost:9640,events:[{name:'Fuel solenoid (×3)',cost:630,date:'Multiple'},{name:'Service (×3)',cost:600,date:'Various'},{name:'All belts (×2)',cost:240,date:'Various'},{name:'Compressor seals',cost:609,date:'Sep 2023'},{name:'Misc',cost:7561,date:'Various'}]},
+  {id:'A-2204',serial:'C-SN-220412',brand:'carrier',cost:7850,events:[{name:'Service (×3)',cost:600,date:'Various'},{name:'Water pump',cost:289,date:'Feb 2024'},{name:'All belts (×2)',cost:146,date:'Various'},{name:'Misc',cost:6815,date:'Various'}]},
+  {id:'A-6612',serial:'TK-SN-661201',brand:'tk',cost:6480,events:[{name:'Service (×2)',cost:400,date:'Various'},{name:'All belts',cost:120,date:'Mar 2024'},{name:'Compressor seals',cost:609,date:'Dec 2023'},{name:'Misc',cost:5351,date:'Various'}]}
+];
+
+var DEALERS=[
+  {name:'ABC Carrier Brisbane',seals:305,belts:73,labor:98,badge:'b-win',badgeText:'Best rate'},
+  {name:'FleetTech Darwin',seals:350,belts:88,labor:115,badge:'b-tie',badgeText:'Mid range'},
+  {name:'XYZ Refrigeration Sydney',seals:412,belts:110,labor:135,badge:'b-warn',badgeText:'35% above avg'}
+];
+
+var CHAT_HISTORY={ask:[],insights:[]};
+var tcoChartInstance=null;
+
+function gv(id){var e=document.getElementById(id);return e?parseFloat(e.value)||0:0;}
+function fmt(n){return '$'+Math.round(n).toLocaleString();}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function startApp(){
+  var fn=document.getElementById('fleetName').value.trim();
+  var un=document.getElementById('userName').value.trim();
+  if(!fn||!un){alert('Please enter your fleet name and your name.');return;}
+  APP.fleetName=fn;APP.userName=un;
+  document.getElementById('topFleet').textContent=fn;
+  document.getElementById('topUser').textContent=un;
+  document.getElementById('welcomeScreen').style.display='none';
+  var ma=document.getElementById('mainApp');ma.style.display='block';
+  renderMaintTable();
+  buildChat('askChatWrap','ask');
+  buildChat('insightChatWrap','insights');
+  renderInsights();
+}
+
+function resetApp(){
+  document.getElementById('welcomeScreen').style.display='block';
+  document.getElementById('mainApp').style.display='none';
+  APP={fleetName:'',userName:'',mode:'auto',uploads:[],committed:false};
+}
+
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active');});
+  var tabs=document.querySelectorAll('.tab');
+  var tabMap={inputs:0,maint:1,summary:2,yby:3,upload:4,insights:5,ask:6};
+  if(tabMap[name]!==undefined)tabs[tabMap[name]].classList.add('active');
+  var pane=document.getElementById('pane-'+name);
+  if(pane)pane.classList.add('active');
+  if(name==='summary')renderSummary();
+  if(name==='yby')renderYbY();
+  if(name==='insights')renderInsights();
+}
+
+function renderMaintTable(){
+  var tb=document.getElementById('maintBody');if(!tb)return;
+  tb.innerHTML='';
+  MAINT.forEach(function(m,i){
+    var cd=m.brand==='tk';var td=m.brand==='carrier';
+    var row=document.createElement('tr');row.className='mt';
+    row.innerHTML=
+      '<td><input type="text" value="'+esc(m.name)+'" onchange="MAINT['+i+'].name=this.value"></td>'+
+      '<td><input type="number" value="'+m.interval+'" min="100" onchange="MAINT['+i+'].interval=parseFloat(this.value)||0"></td>'+
+      '<td><select onchange="MAINT['+i+'].brand=this.value;renderMaintTable()"><option value="both"'+(m.brand==='both'?' selected':'')+'>Both</option><option value="carrier"'+(m.brand==='carrier'?' selected':'')+'>Carrier</option><option value="tk"'+(m.brand==='tk'?' selected':'')+'>ThermoKing</option></select></td>'+
+      '<td><input type="number" value="'+m.cParts+'" min="0" '+(cd?'disabled':'')+' onchange="MAINT['+i+'].cParts=parseFloat(this.value)||0"></td>'+
+      '<td><input type="number" value="'+m.cSRT+'" min="0" step="0.5" '+(cd?'disabled':'')+' onchange="MAINT['+i+'].cSRT=parseFloat(this.value)||0"></td>'+
+      '<td><input type="number" value="'+m.tkParts+'" min="0" '+(td?'disabled':'')+' onchange="MAINT['+i+'].tkParts=parseFloat(this.value)||0"></td>'+
+      '<td><input type="number" value="'+m.tkSRT+'" min="0" step="0.5" '+(td?'disabled':'')+' onchange="MAINT['+i+'].tkSRT=parseFloat(this.value)||0"></td>'+
+      '<td><button class="del-btn" onclick="MAINT.splice('+i+',1);renderMaintTable()" title="Remove">×</button></td>';
+    tb.appendChild(row);
+  });
+}
+
+function addMaintRow(){
+  MAINT.push({name:'New event',interval:5000,brand:'both',cParts:200,cSRT:1.0,tkParts:200,tkSRT:1.0});
+  renderMaintTable();
+  setTimeout(function(){var tb=document.getElementById('maintTable');if(tb)tb.scrollIntoView({behavior:'smooth',block:'end'});},50);
+}
+
+function calcTCO(){
+  var fleetSize=gv('fleetSize')||1;
+  var carrierPct=gv('carrierPct')/100;
+  var hoursPerYear=gv('hoursPerYear')||2000;
+  var numYears=gv('numYears')||15;
+  var totalHours=hoursPerYear*numYears;
+  var cLab=gv('cLab');var tkLab=gv('tkLab');
+  var tkDisc=gv('tkDisc')/100;
+
+  var cMaint=0,tkMaint=0;
+  MAINT.forEach(function(m){
+    var reps=Math.floor(totalHours/m.interval);
+    if(m.brand!=='tk')cMaint+=reps*(m.cParts+m.cSRT*cLab);
+    if(m.brand!=='carrier')tkMaint+=reps*((m.tkParts*(1-tkDisc))+m.tkSRT*tkLab);
+  });
+
+  var cFuelTotal=gv('cFuel')*totalHours;
+  var tkFuelTotal=gv('tkFuel')*totalHours;
+  var cTelematics=gv('cTCap')+gv('cTMo')*12*numYears;
+  var tkTelematics=gv('tkTCap')+gv('tkTMo')*12*numYears;
+  var cCap=gv('cCap');var tkCap=gv('tkCap');
+
+  var cTotal=cCap+cFuelTotal+cMaint+cTelematics;
+  var tkTotal=tkCap+tkFuelTotal+tkMaint+tkTelematics;
+
+  var cUnits=Math.round(fleetSize*carrierPct);
+  var tkUnits=fleetSize-cUnits;
+
+  return{cCap,cFuelTotal,cMaint,cTelematics,cTotal,tkCap,tkFuelTotal,tkMaint,tkTelematics,tkTotal,fleetSize,cUnits,tkUnits,numYears,hoursPerYear};
+}
+
+function renderSummary(){
+  var d=calcTCO();
+  var diff=d.cTotal-d.tkTotal;
+  var winner=diff<-200?'carrier':diff>200?'tk':'tie';
+  var wb=document.getElementById('winnerBanner');
+  if(wb){
+    wb.className='winner '+winner;
+    if(winner==='carrier')wb.innerHTML='<div class="win-label">Lower TCO over '+d.numYears+' years</div><div class="win-val win-c">Carrier saves '+fmt(Math.abs(diff))+' per unit</div>';
+    else if(winner==='tk')wb.innerHTML='<div class="win-label">Lower TCO over '+d.numYears+' years</div><div class="win-val win-tk">ThermoKing saves '+fmt(Math.abs(diff))+' per unit</div>';
+    else wb.innerHTML='<div class="win-label">TCO comparison over '+d.numYears+' years</div><div class="win-val win-tie">Effectively tied — within $200/unit</div>';
+  }
+
+  var kc=document.getElementById('kpiCards');
+  if(kc)kc.innerHTML=
+    '<div class="kpi"><div class="kpi-label">Carrier per unit</div><div class="kpi-val" style="color:var(--carrier)">'+fmt(d.cTotal)+'</div><div class="kpi-sub">Over '+d.numYears+' yr / '+d.hoursPerYear.toLocaleString()+' hrs/yr</div></div>'+
+    '<div class="kpi"><div class="kpi-label">ThermoKing per unit</div><div class="kpi-val" style="color:var(--tk)">'+fmt(d.tkTotal)+'</div><div class="kpi-sub">Over '+d.numYears+' yr / '+d.hoursPerYear.toLocaleString()+' hrs/yr</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Difference per unit</div><div class="kpi-val">'+fmt(Math.abs(diff))+'</div><div class="kpi-sub">'+(winner==='tie'?'Tied':(winner==='carrier'?'Carrier cheaper':'TK cheaper'))+'</div></div>';
+
+  var rows=[['Capital',d.cCap,d.tkCap],['Fuel',d.cFuelTotal,d.tkFuelTotal],['Maintenance',d.cMaint,d.tkMaint],['Telematics',d.cTelematics,d.tkTelematics],['Total',d.cTotal,d.tkTotal]];
+  var bt=document.getElementById('breakdownTable');
+  if(bt){
+    var h='<table><thead><tr><th>Category</th><th class="num">Carrier per unit</th><th class="num">ThermoKing per unit</th><th class="num">Difference</th><th>Better</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var d2=r[1]-r[2];var isTot=r[0]==='Total';
+      var badge=Math.abs(d2)<1?'<span class="badge b-tie">—</span>':(d2<0?'<span class="badge b-carrier">Carrier</span>':'<span class="badge b-tk">TK</span>');
+      h+='<tr class="'+(isTot?'hl':'')+'"><td>'+r[0]+'</td><td class="num">'+fmt(r[1])+'</td><td class="num">'+fmt(r[2])+'</td><td class="num">'+fmt(Math.abs(d2))+'</td><td>'+badge+'</td></tr>';
+    });
+    h+='</tbody></table>';bt.innerHTML=h;
+  }
+
+  var fc=document.getElementById('fleetCards');
+  if(fc)fc.innerHTML=
+    '<div class="kpi"><div class="kpi-label">Carrier fleet TCO ('+d.cUnits.toLocaleString()+' units)</div><div class="kpi-val" style="color:var(--carrier)">'+fmt(d.cTotal*d.cUnits)+'</div></div>'+
+    '<div class="kpi"><div class="kpi-label">TK fleet TCO ('+d.tkUnits.toLocaleString()+' units)</div><div class="kpi-val" style="color:var(--tk)">'+fmt(d.tkTotal*d.tkUnits)+'</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Combined fleet total</div><div class="kpi-val">'+fmt(d.cTotal*d.cUnits+d.tkTotal*d.tkUnits)+'</div></div>';
+}
+
+function renderYbY(){
+  var d=calcTCO();
+  var numYears=gv('numYears')||15;
+  var hoursPerYear=gv('hoursPerYear')||2000;
+  var cLab=gv('cLab');var tkLab=gv('tkLab');var tkDisc=gv('tkDisc')/100;
+  var cFuelHr=gv('cFuel');var tkFuelHr=gv('tkFuel');
+  var cCap=gv('cCap');var tkCap=gv('tkCap');
+  var cTCap=gv('cTCap');var tkTCap=gv('tkTCap');
+  var cTMo=gv('cTMo');var tkTMo=gv('tkTMo');
+
+  var cCum=cCap+cTCap,tkCum=tkCap+tkTCap;
+  var labels=[],cData=[],tkData=[];
+  var ytable='<table><thead><tr><th>Year</th><th class="num">Carrier (annual)</th><th class="num">Carrier (cumulative)</th><th class="num">TK (annual)</th><th class="num">TK (cumulative)</th><th>Cheaper</th></tr></thead><tbody>';
+  for(var y=1;y<=numYears;y++){
+    var hrs=hoursPerYear*y;
+    var prevHrs=hoursPerYear*(y-1);
+    var cAnn=cFuelHr*hoursPerYear+cTMo*12;
+    var tkAnn=tkFuelHr*hoursPerYear+tkTMo*12;
+    MAINT.forEach(function(m){
+      var rNow=Math.floor(hrs/m.interval);
+      var rPrev=Math.floor(prevHrs/m.interval);
+      var reps=rNow-rPrev;
+      if(m.brand!=='tk')cAnn+=reps*(m.cParts+m.cSRT*cLab);
+      if(m.brand!=='carrier')tkAnn+=reps*((m.tkParts*(1-tkDisc))+m.tkSRT*tkLab);
+    });
+    cCum+=cAnn;tkCum+=tkAnn;
+    labels.push('Yr '+y);cData.push(Math.round(cCum));tkData.push(Math.round(tkCum));
+    var cheaper=cCum<tkCum?'<span class="badge b-carrier">Carrier</span>':'<span class="badge b-tk">TK</span>';
+    ytable+='<tr><td>'+y+'</td><td class="num">'+fmt(cAnn)+'</td><td class="num">'+fmt(cCum)+'</td><td class="num">'+fmt(tkAnn)+'</td><td class="num">'+fmt(tkCum)+'</td><td>'+cheaper+'</td></tr>';
+  }
+  ytable+='</tbody></table>';
+  var yt=document.getElementById('ybyTable');if(yt)yt.innerHTML=ytable;
+
+  var ctx=document.getElementById('tcoChart');if(!ctx)return;
+  if(tcoChartInstance)tcoChartInstance.destroy();
+  tcoChartInstance=new Chart(ctx,{
+    type:'line',
+    data:{labels:labels,datasets:[
+      {label:'Carrier',data:cData,borderColor:'#1a5c3a',backgroundColor:'rgba(26,92,58,0.06)',borderWidth:2,pointRadius:3,tension:0.3},
+      {label:'ThermoKing',data:tkData,borderColor:'#8b5e1a',backgroundColor:'rgba(139,94,26,0.06)',borderWidth:2,borderDash:[6,4],pointRadius:3,tension:0.3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+fmt(c.raw);}}}},scales:{y:{ticks:{callback:function(v){return '$'+Math.round(v/1000)+'k';}},grid:{color:'rgba(44,40,32,0.06)'}},x:{grid:{display:false}}}}
+  });
+}
+
+function renderInsights(){
+  var d=calcTCO();
+  var ik=document.getElementById('insightKpis');
+  if(ik)ik.innerHTML=
+    '<div class="kpi"><div class="kpi-label">Total recorded spend</div><div class="kpi-val">'+fmt(UNITS.reduce(function(a,u){return a+u.cost;},0))+'</div><div class="kpi-sub">6 units · 14 months</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Avg spend per unit</div><div class="kpi-val">'+fmt(UNITS.reduce(function(a,u){return a+u.cost;},0)/UNITS.length)+'</div><div class="kpi-sub">vs industry: $9,200</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Problem units</div><div class="kpi-val" style="color:var(--red)">2</div><div class="kpi-sub">&gt;1 std dev above avg</div></div>'+
+    '<div class="kpi"><div class="kpi-label">Data points</div><div class="kpi-val">51</div><div class="kpi-sub">Invoices &amp; work orders</div></div>';
+
+  var it=document.getElementById('insightTrends');
+  if(it)it.innerHTML=
+    '<div class="ins-card"><div class="ins-icon warn"><i class="ti ti-alert-triangle"></i></div><div class="ins-body"><p><strong>Unit A-4821 has had 3 compressor seal replacements</strong> in 14 months — 23% shorter interval than OEM spec. Cumulative spend is 119% above fleet average.</p><small>Recommend full inspection before next repair is authorised</small></div></div>'+
+    '<div class="ins-card"><div class="ins-icon danger"><i class="ti ti-flame"></i></div><div class="ins-body"><p><strong>XYZ Refrigeration (Sydney) charges 35% more</strong> for compressor seals than ABC Carrier Brisbane — for the same job. Labor rate gap adds a further 38%.</p><small>Switching 8 jobs to ABC would have saved ~$2,700 on work already done</small></div></div>'+
+    '<div class="ins-card"><div class="ins-icon good"><i class="ti ti-trending-down"></i></div><div class="ins-body"><p><strong>Scheduled PM frequency has reduced</strong> across Carrier units since you switched to the 3,000 hr interval. Fleet-wide service cost is tracking 12% below last year.</p><small>Compressor seal interval appears to be holding</small></div></div>';
+
+  renderUnitAnalysis();
+  renderDealerComparison();
+  renderEventBars();
+
+  var is=document.getElementById('insightSuggested');
+  if(is){
+    var qs=['What\'s driving unit A-4821 costs?','Generator failure — how much does it cost long-term?','Which dealer should I cut?'];
+    is.innerHTML=qs.map(function(q){return '<span class="suggested-q" onclick="sendMsg(\'insightChatWrap\',\'insights\',\''+q.replace(/'/g,"\\'")+'\')">'+q+'</span>';}).join('');
+  }
+}
+
+function renderUnitAnalysis(){
+  var total=UNITS.reduce(function(a,u){return a+u.cost;},0);
+  var avg=total/UNITS.length;
+  var sorted=UNITS.slice().sort(function(a,b){return b.cost-a.cost;});
+  var maxCost=sorted[0].cost;
+  var h='';
+  sorted.forEach(function(u){
+    var pct=Math.round(u.cost/maxCost*100);
+    var cls=u.cost>avg*1.5?'problem':u.cost>avg*1.1?'elevated':'';
+    var barColor=cls==='problem'?'var(--red)':cls==='elevated'?'var(--amber)':'var(--green)';
+    var badge=u.brand==='carrier'?'<span class="badge b-carrier">Carrier</span>':'<span class="badge b-tk">TK</span>';
+    h+='<div class="unit-row '+cls+'" onclick="toggleUnit(\'detail-'+u.id+'\')">';
+    h+='<div class="unit-id-block"><div class="unit-id">'+u.id+'</div><div class="unit-serial">'+u.serial+'</div></div>';
+    h+=badge;
+    h+='<div class="unit-bar-wrap"><div class="unit-bar"><div class="unit-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div></div>';
+    h+='<div class="unit-cost">'+fmt(u.cost)+'</div>';
+    h+='<i class="ti ti-chevron-down" id="chev-detail-'+u.id+'" style="font-size:14px;color:var(--brown-light);transition:transform .2s"></i>';
+    h+='</div>';
+    h+='<div class="unit-detail" id="detail-'+u.id+'">';
+    h+='<table style="width:100%;font-size:12px"><thead><tr><th>Event</th><th>Date</th><th class="num">Cost</th></tr></thead><tbody>';
+    u.events.forEach(function(e){h+='<tr><td>'+e.name+'</td><td>'+e.date+'</td><td class="num">'+fmt(e.cost)+'</td></tr>';});
+    h+='</tbody></table>';
+    h+='<div style="margin-top:10px;display:flex;gap:8px"><button class="btn btn-sm" onclick="event.stopPropagation();jumpAsk(\'What\'s driving '+u.id+' costs?\')"><i class="ti ti-message-2"></i> Ask Claude about this unit</button></div>';
+    h+='</div>';
+  });
+  h+='<p style="font-size:11px;color:var(--brown-light);margin-top:8px;font-family:var(--mono)">Fleet avg spend: '+fmt(avg)+' per unit · Click any row to expand</p>';
+  document.getElementById('unitAnalysis').innerHTML=h;
+}
+
+function toggleUnit(id){
+  var el=document.getElementById(id),chev=document.getElementById('chev-'+id);
+  if(!el)return;
+  var open=el.style.display==='block';
+  el.style.display=open?'none':'block';
+  if(chev)chev.style.transform=open?'':'rotate(180deg)';
+}
+function jumpAsk(q){showTab('ask');setTimeout(function(){sendMsg('askChatWrap','ask',q);},150);}
+
+function renderDealerComparison(){
+  var h='<p style="font-size:12px;color:var(--brown-mid);margin-bottom:12px">Extracted from your invoices. Same job, different price — gaps worth negotiating.</p><div class="grid3">';
+  DEALERS.forEach(function(d){
+    var hi=d.badge==='b-warn';
+    h+='<div class="dealer-card'+(hi?' '+'" style="border-color:rgba(146,64,14,.25);background:rgba(146,64,14,.03)"':'"')+'>';
+    h+='<div class="dealer-name">'+d.name+'</div>';
+    h+='<div class="dealer-stat"><span>Compressor seals</span><span'+(hi?' style="color:var(--amber)"':'')+'">'+fmt(d.seals)+'</span></div>';
+    h+='<div class="dealer-stat"><span>All belts</span><span>'+fmt(d.belts)+'</span></div>';
+    h+='<div class="dealer-stat"><span>Avg labor rate</span><span'+(hi?' style="color:var(--amber)"':'')+'">$'+d.labor+'/hr</span></div>';
+    h+='<div style="margin-top:8px"><span class="badge '+d.badge+'">'+d.badgeText+'</span></div></div>';
+  });
+  h+='</div>';
+  document.getElementById('dealerComparison').innerHTML=h;
+}
+
+function renderEventBars(){
+  var events=[['Fuel (Carrier)',9900,'var(--carrier)'],['Compressor seals',8210,'var(--carrier)'],['Service / oil / air',5500,'var(--carrier)'],['Generator (TK)',4985,'var(--tk)'],['Alternator',3020,'var(--carrier)'],['Head gaskets (TK)',1540,'var(--tk)']];
+  var max=9900;
+  var h='<div style="margin-bottom:6px">';
+  events.forEach(function(e){
+    h+='<div class="bar-row"><div class="bar-label">'+e[0]+'</div><div class="bar-track"><div class="bar-fill" style="width:'+Math.round(e[1]/max*100)+'%;background:'+e[2]+'"></div></div><div class="bar-val">'+fmt(e[1])+'</div></div>';
+  });
+  h+='</div><p style="font-size:10px;color:var(--brown-light);font-family:var(--mono)"><span style="display:inline-block;width:10px;height:10px;background:var(--carrier);border-radius:2px;vertical-align:-1px;margin-right:3px"></span>Carrier &nbsp;<span style="display:inline-block;width:10px;height:10px;background:var(--tk);border-radius:2px;vertical-align:-1px;margin-right:3px"></span>ThermoKing</p>';
+  document.getElementById('eventBars').innerHTML=h;
+}
+
+function buildChat(containerId,mode){
+  var el=document.getElementById(containerId);if(!el)return;
+  CHAT_HISTORY[mode]=[];
+  el.innerHTML=
+    '<div class="chat-outer">'+
+    '<div class="chat-messages" id="msgs-'+containerId+'"></div>'+
+    '<div class="chat-input-row">'+
+    '<textarea id="cinput-'+containerId+'" placeholder="Ask about your fleet costs…" rows="1" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();sendMsg(\''+containerId+'\',\''+mode+'\',this.value);}"></textarea>'+
+    '<button class="btn btn-green" onclick="sendMsg(\''+containerId+'\',\''+mode+'\',document.getElementById(\'cinput-'+containerId+'\').value)"><i class="ti ti-send"></i></button>'+
+    '</div>'+
+    '<div class="chat-note">Grounded in '+esc(APP.fleetName)+' data · '+esc(APP.userName)+'</div>'+
+    '</div>';
+}
+
+function sendMsg(containerId,mode,q){
+  if(!q||!q.trim())return;
+  var inp=document.getElementById('cinput-'+containerId);
+  if(inp)inp.value='';
+  var msgs=document.getElementById('msgs-'+containerId);if(!msgs)return;
+  msgs.innerHTML+='<div class="msg-wrap-user"><div class="msg-meta">'+esc(APP.userName)+'</div><div class="msg user">'+esc(q)+'</div></div>';
+  var tid='t-'+Date.now();
+  msgs.innerHTML+='<div id="'+tid+'" class="msg-wrap-claude"><div class="msg-meta">Claude</div><div class="msg claude"><div class="typing"><span></span><span></span><span></span></div></div></div>';
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(function(){
+    var te=document.getElementById(tid);if(te)te.remove();
+    var ans=getAnswer(q);
+    msgs.innerHTML+='<div class="msg-wrap-claude"><div class="msg-meta">Claude — '+esc(APP.fleetName)+' data</div><div class="msg claude">'+ans+'</div></div>';
+    msgs.scrollTop=msgs.scrollHeight;
+  },1400);
+}
+
+function getAnswer(q){
+  var ql=q.toLowerCase();
+  if(ql.includes('highest cost')||ql.includes('where is my'))
+    return 'Based on your data, <strong>fuel is your largest single cost driver</strong> — approximately $9,900 per Carrier unit over 15 years at 2,000 hrs/yr and $1.32/hr.<br><br>Close behind: <strong>compressor seals</strong>, which your real invoices show failing ~23% earlier than the OEM 8,000 hr interval. At actual replacement frequency that\'s closer to $10,500 per unit over 15 years.<br><br>Together, fuel + compressor seals represent roughly <strong>42% of total per-unit TCO</strong>. Want me to model what a renegotiated seal interval would save?';
+  if(ql.includes('dealer')||ql.includes('stop using')||ql.includes('cut'))
+    return '<strong>XYZ Refrigeration (Sydney)</strong> is your highest-cost supplier. Their compressor seal price ($412) is 35% above ABC Carrier Brisbane ($305), and their labor rate ($135/hr vs $98/hr) compounds that gap significantly.<br><br>Based on your invoices they\'ve handled 8 jobs. Switching those to ABC would have saved approximately <strong>$2,700</strong> on work already done.';
+  if(ql.includes('fuel')||ql.includes('0.10'))
+    return 'A $0.10/hr fuel saving across 840 Carrier units at 2,000 hrs/yr saves <strong>$168,000 per year</strong> fleet-wide — or <strong>$2.52M over 15 years</strong>.<br><br>That\'s significant enough to justify renegotiating your fuel supply contract or accelerating any engine efficiency upgrade program.';
+  if(ql.includes('4821')||ql.includes('replace')||ql.includes('repair'))
+    return 'Unit <strong>A-4821 (C-SN-482109)</strong> has had 3 compressor seal replacements in 14 months at $305–$412 each plus labor. Total recorded spend: $18,420 — 119% above fleet average.<br><br>At this trajectory, cumulative repair cost will exceed replacement cost within approximately <strong>18–24 months</strong>.<br><br><strong>Recommend flagging for a full inspection before the next repair is authorised.</strong>';
+  if(ql.includes('3302')||ql.includes('generator'))
+    return 'Unit <strong>A-3302 (TK-SN-330214)</strong> had a generator replacement ($4,985) and head gaskets in the same 12-month period — your two largest single-event costs. This unit alone represents <strong>12% of total recorded spend</strong> across your 6 tracked assets.';
+  if(ql.includes('break')||ql.includes('crossover'))
+    return 'Based on current inputs, Carrier\'s higher capital cost ($26k vs $24k) is offset by lower fuel burn and maintenance costs by approximately <strong>Year 6</strong>. After that point Carrier accumulates savings at roughly $840/unit/year.';
+  if(ql.includes('tk')||ql.includes('thermoking'))
+    return 'Across your TK units, the two standout cost drivers are the <strong>generator ($4,985)</strong> and <strong>head gaskets ($1,540)</strong> — both concentrated on unit A-3302.';
+  return 'Based on '+APP.fleetName+'\'s data (51 data points, 14 months, 6 tracked assets), I can dig into specific units, events, dealers, or cost categories. Could you be a bit more specific?';
+}
+
+/* UPLOAD STUBS */
+function handleFiles(files){if(files&&files.length)simulateUpload(files[0].name);}
+function handleDrop(e){e.preventDefault();document.getElementById('dropZone').classList.remove('dragover');if(e.dataTransfer.files.length)simulateUpload(e.dataTransfer.files[0].name);}
+function simulateUpload(name){
+  document.getElementById('uploadProcessing').style.display='block';
+  document.getElementById('claudeSummary').innerHTML='<strong>Processing: '+esc(name)+'</strong><br>Claude has extracted <span class="stat-pill">14 line items</span> <span class="stat-pill">3 units</span> <span class="stat-pill">$8,420 total</span> — mapping to your maintenance schedule now.';
+  APP.uploads.push({name:name,date:new Date().toLocaleDateString()});
+  renderUploadHistory();
+}
+function renderUploadHistory(){
+  var h='';APP.uploads.forEach(function(u){h+='<div class="upload-file-item"><i class="ti ti-file-check"></i><span>'+esc(u.name)+'</span><span style="margin-left:auto;color:var(--brown-light);font-family:var(--mono);font-size:10px">'+u.date+'</span></div>';});
+  var el=document.getElementById('uploadHistoryList');if(el)el.innerHTML=h;
+  var uh=document.getElementById('uploadHistory');if(uh&&APP.uploads.length)uh.style.display='block';
+}
+function selectMode(m){
+  APP.mode=m;
+  ['auto','extremes','full'].forEach(function(k){var el=document.getElementById('mode-'+k);if(el)el.classList.toggle('selected',k===m);});
+  if(m==='extremes'){
+    var cb=document.getElementById('claudeSummary');
+    if(cb&&!document.querySelector('.threshold-row'))cb.insertAdjacentHTML('afterend','<div class="threshold-row"><span style="color:var(--brown-mid)">Show items above</span><input type="number" value="500" min="0" style="width:70px"> <span style="color:var(--brown-mid)">$</span><input type="range" min="0" max="5000" value="500" style="flex:1;accent-color:var(--green)"><span style="color:var(--brown-mid)">confidence below</span><input type="number" value="70" min="0" max="100" style="width:50px"><span style="color:var(--brown-mid)">%</span></div>');
+  }
+}
+function cancelUpload(){document.getElementById('uploadProcessing').style.display='none';}
+function processUpload(){
+  APP.committed=true;
+  document.getElementById('uploadProcessing').style.display='none';
+  showTab('insights');
+}
+
+window.addEventListener('DOMContentLoaded',function(){
+  var askSugg=['Where is my highest cost?','Which dealer should I stop using?','Model a $0.10/hr fuel saving','Replace vs repair unit A-4821?','Carrier break-even year?'];
+  var el=document.getElementById('askSuggested');
+  if(el)el.innerHTML=askSugg.map(function(q){return '<span class="suggested-q" onclick="sendMsg(\'askChatWrap\',\'ask\',\''+q.replace(/'/g,"\\'")+'\')">'+q+'</span>';}).join('');
+});
+</script>
+</body>
+</html>
