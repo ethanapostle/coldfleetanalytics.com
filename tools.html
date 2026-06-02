@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -683,7 +682,7 @@ footer a:hover { color: var(--green); }
 
 <!-- TOOL SELECTOR -->
 <div class="tools-nav">
-  <div class="tool-card active" onclick="selectTool(this)">
+  <div class="tool-card active" id="card-tco" onclick="switchTool('tco', this)">
     <div class="tool-icon">⚖️</div>
     <div>
       <h3>Reefer TCO Calculator</h3>
@@ -691,25 +690,26 @@ footer a:hover { color: var(--green); }
       <span class="tool-badge">Free · No signup</span>
     </div>
   </div>
-  <div class="tool-card" style="opacity:0.5;cursor:default;">
-    <div class="tool-icon">📊</div>
+  <div class="tool-card" id="card-diag" onclick="switchTool('diag', this)">
+    <div class="tool-icon">🔧</div>
     <div>
-      <h3>Cost Attribution Model</h3>
-      <p>Break down maintenance spend by asset, component, and event type.</p>
-      <span class="tool-badge" style="background:#f0ebe4;color:var(--brown-light)">Coming soon</span>
+      <h3>Reefer Diagnostics</h3>
+      <p>AI-guided fault diagnosis for Carrier and Thermo King units — step by step, code by code.</p>
+      <span class="tool-badge">Free · No signup</span>
     </div>
   </div>
-  <div class="tool-card" style="opacity:0.5;cursor:default;">
-    <div class="tool-icon">🔮</div>
+  <div class="tool-card" id="card-audit" onclick="switchTool('audit', this)">
+    <div class="tool-icon">🧾</div>
     <div>
-      <h3>Failure Prediction Score</h3>
-      <p>Estimate remaining useful life and failure probability for key components.</p>
-      <span class="tool-badge" style="background:#f0ebe4;color:var(--brown-light)">Coming soon</span>
+      <h3>Invoice Auditor</h3>
+      <p>Paste any repair invoice. We check every line against official SRT rates and flag what's over-charged.</p>
+      <span class="tool-badge">Free · No signup</span>
     </div>
   </div>
 </div>
 
 <!-- CALCULATOR -->
+<div id="tool-tco">
 <div class="calc-wrap">
 
   <!-- WELCOME -->
@@ -900,19 +900,9 @@ footer a:hover { color: var(--green); }
   </div>
 
 </div><!-- /calc-wrap -->
-
-<!-- FOOTER -->
-<footer>
-  <p><a href="index.html">← Back to Cold Fleet Analytics</a> &nbsp;·&nbsp; <a href="index.html#contact">hello@coldfleetanalytics.com</a> &nbsp;·&nbsp; © 2024 Cold Fleet Analytics</p>
-</footer>
+</div><!-- /tool-tco -->
 
 <script>
-/* ─── TOOL SELECTOR ─── */
-function selectTool(el) {
-  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-}
-
 /* ─── CALCULATOR LOGIC (unchanged from original) ─── */
 var APP={fleetName:'',userName:'',mode:'auto',uploads:[],committed:false};
 
@@ -1299,6 +1289,1399 @@ window.addEventListener('DOMContentLoaded',function(){
   var el=document.getElementById('askSuggested');
   if(el)el.innerHTML=askSugg.map(function(q){return '<span class="suggested-q" onclick="sendMsg(\'askChatWrap\',\'ask\',\''+q.replace(/'/g,"\\'")+'\')">'+q+'</span>';}).join('');
 });
+
+/* ── TOOL SWITCHER handled below ── */
 </script>
+
+<!-- ═══════════════════════════════════════════════════
+     REEFER DIAGNOSTICS TOOL
+════════════════════════════════════════════════════ -->
+<style>
+/* Diagnostics tool styles — scoped inside #tool-diag */
+#tool-diag {
+  display: none;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 56px 80px;
+}
+#tool-diag .diag-app {
+  display: flex; flex-direction: column;
+  background: var(--white);
+  border: 1px solid var(--cream-mid);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-top: 32px;
+  box-shadow: 0 4px 32px rgba(44,40,32,0.06);
+}
+#tool-diag .d-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; border-bottom: 1px solid var(--cream-mid);
+  background: var(--white);
+}
+#tool-diag .d-brand { display: flex; align-items: center; gap: 12px; }
+#tool-diag .d-brand-icon {
+  width: 36px; height: 36px; background: var(--green);
+  border-radius: 8px; display: flex; align-items: center;
+  justify-content: center; color: white; font-size: 18px;
+}
+#tool-diag .d-brand-name { font-family: var(--serif); font-size: 16px; font-weight: 600; color: var(--brown); }
+#tool-diag .d-brand-sub { font-size: 11px; color: var(--brown-light); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
+#tool-diag .d-topbar-actions { display: flex; gap: 8px; }
+
+#tool-diag .d-step-rail {
+  display: flex; border-bottom: 1px solid var(--cream-mid);
+  background: var(--cream); overflow-x: auto;
+}
+#tool-diag .d-step {
+  display: flex; align-items: center; gap: 7px; padding: 10px 18px;
+  font-size: 12px; font-family: var(--mono); color: var(--brown-light);
+  border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s;
+}
+#tool-diag .d-step.active { color: var(--green); border-bottom-color: var(--green); }
+#tool-diag .d-step.done { color: var(--brown-mid); }
+#tool-diag .d-step-n {
+  width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--cream-mid); color: var(--brown-light);
+}
+#tool-diag .d-step.active .d-step-n { background: var(--green); color: white; }
+#tool-diag .d-step.done .d-step-n { background: var(--brown-mid); color: white; }
+
+#tool-diag .d-content { padding: 28px 24px; }
+#tool-diag .d-screen { display: none; flex-direction: column; gap: 20px; }
+#tool-diag .d-screen.visible { display: flex; animation: fadeUp .2s ease; }
+#tool-diag .d-screen-title { font-family: var(--serif); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--brown); }
+#tool-diag .d-screen-sub { font-size: 14px; color: var(--brown-mid); line-height: 1.65; margin-top: 5px; }
+
+#tool-diag .d-card { background: var(--cream); border: 1px solid var(--cream-mid); border-radius: 10px; padding: 18px 20px; }
+#tool-diag label { font-size: 12px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--brown-light); display: block; margin-bottom: 7px; }
+#tool-diag input, #tool-diag select, #tool-diag textarea {
+  width: 100%; font-family: var(--sans); font-size: 14px;
+  background: var(--white); border: 1px solid var(--cream-mid);
+  border-radius: 6px; padding: 10px 13px;
+  color: var(--brown); outline: none; transition: border-color 0.15s;
+}
+#tool-diag input:focus, #tool-diag select:focus, #tool-diag textarea:focus { border-color: var(--green); background: var(--white); }
+#tool-diag textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+#tool-diag .d-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+#tool-diag .d-field { display: flex; flex-direction: column; }
+
+#tool-diag .d-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; font-size: 14px; font-family: var(--sans);
+  font-weight: 500; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--cream-mid); background: var(--white); color: var(--brown-mid);
+  transition: all 0.15s; white-space: nowrap;
+}
+#tool-diag .d-btn:hover { background: var(--cream); }
+#tool-diag .d-btn-primary { background: var(--green); color: white; border-color: var(--green); }
+#tool-diag .d-btn-primary:hover { background: var(--green-light); border-color: var(--green-light); }
+#tool-diag .d-btn-sm { padding: 7px 14px; font-size: 12px; }
+#tool-diag .d-btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+#tool-diag .d-photo-drop {
+  border: 2px dashed var(--cream-mid); border-radius: 10px;
+  padding: 36px 24px; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: var(--cream);
+}
+#tool-diag .d-photo-drop:hover { border-color: var(--green); background: rgba(26,92,58,0.04); }
+#tool-diag .d-photo-drop .drop-icon { font-size: 32px; color: var(--brown-faint); display: block; margin-bottom: 10px; }
+#tool-diag .d-photo-drop p { font-size: 14px; color: var(--brown-mid); }
+#tool-diag .d-photo-drop span { font-size: 12px; color: var(--brown-faint); display: block; margin-top: 4px; font-family: var(--mono); }
+
+#tool-diag .d-or-divider { display: flex; align-items: center; gap: 12px; }
+#tool-diag .d-or-divider::before, #tool-diag .d-or-divider::after { content: ''; flex: 1; height: 1px; background: var(--cream-mid); }
+#tool-diag .d-or-divider span { font-size: 11px; color: var(--brown-light); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; }
+
+#tool-diag .d-alert { display: flex; gap: 12px; padding: 14px 16px; border-radius: 6px; border-left: 3px solid; }
+#tool-diag .d-alert-warning { background: rgba(146,64,14,0.06); border-color: #92400e; }
+#tool-diag .d-alert-warning i { color: #92400e; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+#tool-diag .d-alert p { font-size: 13px; line-height: 1.6; color: var(--brown-mid); }
+#tool-diag .d-alert strong { color: var(--brown); }
+
+#tool-diag .d-code-list { display: flex; flex-direction: column; gap: 8px; }
+#tool-diag .d-code-entry {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--white); border: 1px solid var(--cream-mid);
+  border-radius: 6px; padding: 9px 13px;
+}
+#tool-diag .d-code-entry input { background: transparent; border: none; padding: 0; font-size: 13px; font-family: var(--mono); }
+#tool-diag .d-code-entry input:focus { border: none; background: transparent; }
+#tool-diag .d-code-tag { font-size: 10px; font-family: var(--mono); background: rgba(26,92,58,0.1); color: var(--green); padding: 2px 7px; border-radius: 99px; flex-shrink: 0; }
+#tool-diag .d-rm-btn { background: none; border: none; cursor: pointer; color: var(--brown-faint); padding: 0; font-size: 16px; transition: color 0.15s; }
+#tool-diag .d-rm-btn:hover { color: var(--red); }
+#tool-diag .d-add-code { display: flex; align-items: center; gap: 7px; background: none; border: 1px dashed var(--cream-mid); border-radius: 6px; padding: 9px 14px; font-size: 13px; font-family: var(--mono); color: var(--brown-light); cursor: pointer; width: fit-content; transition: all 0.15s; margin-top: 8px; }
+#tool-diag .d-add-code:hover { border-color: var(--green); color: var(--green); }
+
+#tool-diag .d-chat-wrap { display: flex; flex-direction: column; gap: 16px; max-height: 420px; overflow-y: auto; padding: 16px; }
+#tool-diag .d-msg { display: flex; gap: 10px; align-items: flex-start; }
+#tool-diag .d-msg.user { flex-direction: row-reverse; }
+#tool-diag .d-av { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; font-family: var(--mono); }
+#tool-diag .d-av.ai { background: var(--green); color: white; }
+#tool-diag .d-av.tech { background: var(--brown-mid); color: white; }
+#tool-diag .d-bubble { max-width: 80%; font-size: 13.5px; line-height: 1.7; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--cream-mid); background: var(--white); color: var(--brown); }
+#tool-diag .d-msg.user .d-bubble { background: rgba(26,92,58,0.07); border-color: rgba(26,92,58,0.2); }
+#tool-diag .d-bubble-community { background: rgba(146,64,14,0.06) !important; border-color: rgba(146,64,14,0.2) !important; font-style: italic; }
+#tool-diag .d-source-tag { font-size: 10px; color: var(--brown-light); margin-top: 5px; display: flex; align-items: center; gap: 5px; font-family: var(--mono); }
+#tool-diag .sdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+#tool-diag .sdot-manual { background: var(--green); }
+#tool-diag .sdot-community { background: #92400e; }
+
+#tool-diag .d-typing { display: flex; gap: 5px; align-items: center; padding: 14px; }
+#tool-diag .d-typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: bounce 1.2s infinite; }
+#tool-diag .d-typing span:nth-child(2) { animation-delay: 0.2s; }
+#tool-diag .d-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+#tool-diag .d-chat-input-area { border-top: 1px solid var(--cream-mid); padding: 14px 16px; display: flex; gap: 10px; align-items: flex-end; background: var(--cream); }
+#tool-diag .d-chat-input-area textarea { flex: 1; min-height: 42px; max-height: 120px; border-radius: 6px; font-size: 14px; background: var(--white); }
+#tool-diag .d-send-btn { background: var(--green); border: none; border-radius: 6px; color: white; padding: 11px 16px; cursor: pointer; font-size: 16px; transition: opacity 0.15s; flex-shrink: 0; }
+#tool-diag .d-send-btn:hover { opacity: 0.85; }
+#tool-diag .d-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+#tool-diag .d-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+#tool-diag .d-stat-card { background: var(--cream); border: 1px solid var(--cream-mid); border-radius: 8px; padding: 14px 16px; }
+#tool-diag .d-stat-label { font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--brown-light); margin-bottom: 5px; }
+#tool-diag .d-stat-val { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--brown); }
+#tool-diag .d-stat-sub { font-size: 12px; color: var(--brown-mid); margin-top: 3px; font-family: var(--mono); }
+
+#tool-diag .d-wo-block { background: var(--cream); border: 1px solid var(--cream-mid); border-radius: 10px; padding: 20px 22px; font-size: 13px; line-height: 1.9; }
+#tool-diag .d-wo-block h3 { font-family: var(--serif); font-size: 18px; font-weight: 600; margin-bottom: 14px; color: var(--brown); }
+#tool-diag .d-wo-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--cream-mid); }
+#tool-diag .d-wo-row:last-child { border-bottom: none; }
+#tool-diag .d-wo-key { color: var(--brown-light); font-family: var(--mono); font-size: 12px; }
+#tool-diag .d-wo-val { font-weight: 500; text-align: right; max-width: 60%; color: var(--brown); }
+
+#tool-diag .d-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-family: var(--mono); font-weight: 500; }
+#tool-diag .d-pill-green { background: rgba(26,92,58,0.1); color: var(--green); }
+#tool-diag .d-pill-amber { background: rgba(146,64,14,0.08); color: #92400e; }
+
+#tool-diag .d-unit-badge { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--cream); border: 1px solid var(--cream-mid); border-radius: 8px; font-size: 13px; }
+#tool-diag .d-unit-badge i { color: var(--green); font-size: 18px; }
+#tool-diag .d-unit-badge strong { font-weight: 600; color: var(--brown); }
+#tool-diag .d-unit-badge span { color: var(--brown-light); font-family: var(--mono); font-size: 11px; }
+
+#tool-diag .d-pending-list { display: flex; flex-direction: column; }
+#tool-diag .d-pending-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--cream-mid); }
+#tool-diag .d-pending-item:last-child { border-bottom: none; }
+#tool-diag .d-p-info { font-size: 13px; font-weight: 600; color: var(--brown); }
+#tool-diag .d-p-meta { font-size: 11px; color: var(--brown-light); margin-top: 3px; font-family: var(--mono); }
+#tool-diag .d-p-actions { display: flex; gap: 7px; flex-shrink: 0; }
+#tool-diag .d-apr { background: rgba(26,92,58,0.08); color: var(--green); border: 1px solid rgba(26,92,58,0.25); border-radius: 6px; padding: 5px 13px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+#tool-diag .d-apr:hover { background: var(--green); color: white; }
+#tool-diag .d-rej { background: rgba(185,28,28,0.07); color: var(--red); border: 1px solid rgba(185,28,28,0.2); border-radius: 6px; padding: 5px 13px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+#tool-diag .d-rej:hover { background: var(--red); color: white; }
+
+@media(max-width:640px) { #tool-diag { padding: 0 16px 60px; } #tool-diag .d-field-row { grid-template-columns: 1fr; } }
+@media print { #tool-diag .d-topbar, #tool-diag .d-step-rail, #tool-diag .d-btn-row, #tool-diag .d-chat-input-area, #tool-diag .d-topbar-actions { display: none !important; } }
+</style>
+
+<div id="tool-diag">
+  <div class="diag-app">
+
+    <!-- TOPBAR -->
+    <div class="d-topbar">
+      <div class="d-brand">
+        <div class="d-brand-icon"><i class="ti ti-snowflake"></i></div>
+        <div>
+          <div class="d-brand-name">Reefer Diagnostics</div>
+          <div class="d-brand-sub">Carrier · Thermo King · Service AI</div>
+        </div>
+      </div>
+      <div class="d-topbar-actions">
+        <button class="d-btn d-btn-sm" onclick="dShowAdmin()"><i class="ti ti-shield-check"></i> Admin</button>
+        <button class="d-btn d-btn-sm" onclick="dNewSession()"><i class="ti ti-plus"></i> New session</button>
+      </div>
+    </div>
+
+    <!-- STEP RAIL -->
+    <div class="d-step-rail">
+      <div class="d-step active" id="dsp0"><div class="d-step-n">1</div> Unit ID</div>
+      <div class="d-step" id="dsp1"><div class="d-step-n">2</div> Intake</div>
+      <div class="d-step" id="dsp2"><div class="d-step-n">3</div> Diagnosis</div>
+      <div class="d-step" id="dsp3"><div class="d-step-n">4</div> Outcome</div>
+      <div class="d-step" id="dsp4"><div class="d-step-n">5</div> Work order</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="d-content">
+
+      <!-- S0: UNIT ID -->
+      <div class="d-screen visible" id="ds0">
+        <div>
+          <div class="d-screen-title">What unit are you working on?</div>
+          <div class="d-screen-sub">Enter the model or upload a photo of the data plate and Claude will identify it.</div>
+        </div>
+        <label for="dPhotoInput" class="d-photo-drop" id="dPhotoDrop">
+          <i class="ti ti-camera drop-icon"></i>
+          <p>Tap to photograph the data plate</p>
+          <span>Claude identifies model, serial &amp; year</span>
+          <input type="file" id="dPhotoInput" accept="image/*" style="display:none" onchange="dHandlePhoto(event)" />
+        </label>
+        <div id="dPhotoPreview" style="display:none; margin-top:-10px;">
+          <div class="d-unit-badge" id="dIdentifiedUnit">
+            <i class="ti ti-loader ti-spin"></i>
+            <div><strong>Identifying unit...</strong><br><span>Claude is reading the data plate</span></div>
+          </div>
+        </div>
+        <div class="d-or-divider"><span>or enter manually</span></div>
+        <div class="d-card">
+          <div class="d-field-row" style="margin-bottom:16px;">
+            <div class="d-field">
+              <label>Make</label>
+              <select id="dMake" onchange="dUpdateBadge()">
+                <option value="Carrier Transicold">Carrier Transicold</option>
+                <option value="Thermo King">Thermo King</option>
+                <option value="Daikin">Daikin</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="d-field">
+              <label>Model</label>
+              <input id="dUnitModel" type="text" placeholder="e.g. Vector 1550" oninput="dUpdateBadge()" />
+            </div>
+          </div>
+          <div class="d-field-row">
+            <div class="d-field">
+              <label>Serial number</label>
+              <input id="dSerial" type="text" placeholder="Optional" oninput="dUpdateBadge()" />
+            </div>
+            <div class="d-field">
+              <label>Year</label>
+              <input id="dYear" type="text" placeholder="e.g. 2019" oninput="dUpdateBadge()" />
+            </div>
+          </div>
+        </div>
+        <div class="d-btn-row">
+          <button class="d-btn d-btn-primary" onclick="dGoStep(1)">Continue <i class="ti ti-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- S1: INTAKE -->
+      <div class="d-screen" id="ds1">
+        <div>
+          <div class="d-screen-title">Unit intake</div>
+          <div class="d-screen-sub">Tell us what's going on. Be thorough — Claude will verify everything independently.</div>
+        </div>
+        <div id="dUnitBadge1" class="d-unit-badge">
+          <i class="ti ti-snowflake"></i>
+          <div><strong id="dUnitLabel">—</strong><br><span id="dUnitMeta">—</span></div>
+        </div>
+        <div class="d-alert d-alert-warning">
+          <i class="ti ti-alert-triangle"></i>
+          <p><strong>Important:</strong> Claude does not trust prior diagnostics. Every session re-walks fundamentals from scratch regardless of what has already been checked. This is by design.</p>
+        </div>
+        <div class="d-card">
+          <div class="d-field-row" style="margin-bottom:16px;">
+            <div class="d-field">
+              <label>Engine hours</label>
+              <input id="dHours" type="number" placeholder="e.g. 14200" />
+            </div>
+            <div class="d-field">
+              <label>Setpoint at complaint</label>
+              <input id="dSetpoint" type="text" placeholder="e.g. -18°C" />
+            </div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <label>Active alarm / fault codes</label>
+            <div class="d-code-list" id="dCodeList">
+              <div class="d-code-entry">
+                <span class="d-code-tag">CODE</span>
+                <input type="text" placeholder="e.g. 26 — High Discharge Pressure" style="flex:1;" />
+                <button class="d-rm-btn" onclick="dRemoveCode(this)"><i class="ti ti-x"></i></button>
+              </div>
+            </div>
+            <button class="d-add-code" onclick="dAddCode()"><i class="ti ti-plus"></i> Add code</button>
+          </div>
+          <div class="d-field">
+            <label>Problem statement</label>
+            <textarea id="dProblem" placeholder="Describe what the unit is doing — temperature spread, unusual sounds, cycling behaviour, anything the driver reported..."></textarea>
+          </div>
+        </div>
+        <div class="d-card">
+          <label>Prior diagnostics (if any)</label>
+          <textarea id="dPriorDiag" placeholder="What has already been checked or replaced? Claude will note this but will not rely on it."></textarea>
+          <p style="font-size:11px; color:var(--brown-light); margin-top:8px; font-family:var(--mono);"><i class="ti ti-info-circle" style="font-size:12px; vertical-align:-1px;"></i> Claude independently verifies all basics regardless of prior work.</p>
+        </div>
+        <div class="d-btn-row">
+          <button class="d-btn" onclick="dGoStep(0)"><i class="ti ti-arrow-left"></i> Back</button>
+          <button class="d-btn d-btn-primary" onclick="dStartDiagnosis()">Start diagnosis <i class="ti ti-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- S2: DIAGNOSIS -->
+      <div class="d-screen" id="ds2">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          <div>
+            <div class="d-screen-title">Active diagnosis</div>
+            <div class="d-screen-sub" id="dDiagSubtitle">—</div>
+          </div>
+          <span class="d-pill d-pill-amber"><i class="ti ti-activity"></i> In progress</span>
+        </div>
+        <div style="background:var(--white); border:1px solid var(--cream-mid); border-radius:10px; overflow:hidden;">
+          <div style="padding:10px 16px; background:var(--cream); border-bottom:1px solid var(--cream-mid); display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+            <span style="font-size:11px; color:var(--brown-light); font-family:var(--mono);">Source:</span>
+            <span style="display:flex; align-items:center; gap:5px; font-size:11px; color:var(--brown-light); font-family:var(--mono);"><span class="sdot sdot-manual"></span> Service manual</span>
+            <span style="display:flex; align-items:center; gap:5px; font-size:11px; color:var(--brown-light); font-family:var(--mono);"><span class="sdot sdot-community"></span> Community (unverified)</span>
+          </div>
+          <div class="d-chat-wrap" id="dChatBox"></div>
+          <div class="d-chat-input-area">
+            <textarea id="dTechInput" placeholder="Type your finding or answer..." rows="1" onkeydown="dHandleKey(event)"></textarea>
+            <button class="d-send-btn" id="dSendBtn" onclick="dSendTech()"><i class="ti ti-send"></i></button>
+          </div>
+        </div>
+        <div class="d-btn-row">
+          <button class="d-btn" onclick="dGoStep(1)"><i class="ti ti-arrow-left"></i> Back</button>
+          <button class="d-btn d-btn-primary" onclick="dGoStep(3)">Log outcome <i class="ti ti-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- S3: OUTCOME -->
+      <div class="d-screen" id="ds3">
+        <div>
+          <div class="d-screen-title">Log the outcome</div>
+          <div class="d-screen-sub">Record the root cause and fix. This will be held for admin review before entering the knowledge base.</div>
+        </div>
+        <div class="d-stat-grid">
+          <div class="d-stat-card">
+            <div class="d-stat-label">Unit</div>
+            <div class="d-stat-val" id="doc-unit">—</div>
+            <div class="d-stat-sub" id="doc-make">—</div>
+          </div>
+          <div class="d-stat-card">
+            <div class="d-stat-label">Hours at service</div>
+            <div class="d-stat-val" id="doc-hours">—</div>
+            <div class="d-stat-sub" id="doc-codes">—</div>
+          </div>
+        </div>
+        <div class="d-card">
+          <div class="d-field" style="margin-bottom:16px;">
+            <label>Root cause confirmed</label>
+            <input id="dRootCause" type="text" placeholder="e.g. Failed HP transducer reading 450 psi static" />
+          </div>
+          <div class="d-field" style="margin-bottom:16px;">
+            <label>Fix performed</label>
+            <textarea id="dFixPerformed" placeholder="Describe what was done — parts replaced, adjustments made, verification steps completed..."></textarea>
+          </div>
+          <div class="d-field-row" style="margin-bottom:16px;">
+            <div class="d-field">
+              <label>Parts replaced (P/N)</label>
+              <input id="dPartsReplaced" type="text" placeholder="Part number(s)" />
+            </div>
+            <div class="d-field">
+              <label>Labour hours (actual)</label>
+              <input id="dLabourHours" type="number" step="0.5" placeholder="e.g. 2.5" />
+            </div>
+          </div>
+          <div class="d-field">
+            <label>Tech notes</label>
+            <textarea id="dTechNotes" placeholder="Anything unusual future techs should know..."></textarea>
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--brown-light); font-family:var(--mono); display:flex; align-items:center; gap:6px;">
+          <i class="ti ti-clock"></i> Outcome held for admin approval before entering knowledge base.
+        </div>
+        <div class="d-btn-row">
+          <button class="d-btn" onclick="dGoStep(2)"><i class="ti ti-arrow-left"></i> Back</button>
+          <button class="d-btn d-btn-primary" onclick="dGenerateWO()">Generate work order <i class="ti ti-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- S4: WORK ORDER -->
+      <div class="d-screen" id="ds4">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          <div>
+            <div class="d-screen-title">Work order</div>
+            <div class="d-screen-sub">Review before printing or exporting.</div>
+          </div>
+          <span class="d-pill d-pill-green"><i class="ti ti-check"></i> Complete</span>
+        </div>
+        <div class="d-wo-block">
+          <h3>Cold Fleet Analytics — Diagnostic Work Order</h3>
+          <div id="dWoRows"></div>
+        </div>
+        <div class="d-btn-row">
+          <button class="d-btn d-btn-primary" onclick="window.print()"><i class="ti ti-printer"></i> Print / PDF</button>
+          <button class="d-btn" onclick="dExportText()"><i class="ti ti-file-text"></i> Export text</button>
+          <button class="d-btn" onclick="dNewSession()"><i class="ti ti-plus"></i> New session</button>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div class="d-screen" id="dsAdmin">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <div class="d-screen-title">Admin — pending outcomes</div>
+            <div class="d-screen-sub">Review and approve submissions before they enter the knowledge base.</div>
+          </div>
+          <button class="d-btn d-btn-sm" onclick="dGoStep(0)"><i class="ti ti-x"></i> Close</button>
+        </div>
+        <div class="d-card">
+          <div class="d-pending-list" id="dPendingList">
+            <div class="d-pending-item">
+              <div>
+                <div class="d-p-info">Vector 1550 · Code 26 → HP transducer replaced</div>
+                <div class="d-p-meta">Submitted · May 16 2026 · 2.5 hrs actual</div>
+              </div>
+              <div class="d-p-actions">
+                <button class="d-apr" onclick="dApprove(this)">Approve</button>
+                <button class="d-rej" onclick="dReject(this)">Reject</button>
+              </div>
+            </div>
+            <div class="d-pending-item">
+              <div>
+                <div class="d-p-info">Supra 950MT · Code 41 → Evap fan motor replaced</div>
+                <div class="d-p-meta">Submitted · May 15 2026 · 3.0 hrs actual</div>
+              </div>
+              <div class="d-p-actions">
+                <button class="d-apr" onclick="dApprove(this)">Approve</button>
+                <button class="d-rej" onclick="dReject(this)">Reject</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /d-content -->
+  </div><!-- /diag-app -->
+</div><!-- /tool-diag -->
+
+<script>
+/* ═══════════════════════════════
+   DIAGNOSTICS JS — all prefixed d
+═══════════════════════════════ */
+const dState = {
+  make:'', model:'', serial:'', year:'',
+  hours:'', setpoint:'', codes:[], problem:'', priorDiag:'',
+  chatHistory:[],
+  rootCause:'', fixPerformed:'', parts:'', labour:'', techNotes:''
+};
+
+function dBuildSystemPrompt() {
+  return `You are an expert refrigeration unit diagnostic assistant for Cold Fleet Analytics, specializing in transport refrigeration units — primarily Carrier Transicold and Thermo King.
+
+UNIT IN SERVICE:
+Make: ${dState.make}
+Model: ${dState.model}
+Serial: ${dState.serial || 'Unknown'}
+Year: ${dState.year || 'Unknown'}
+Engine hours: ${dState.hours || 'Unknown'}
+Setpoint at complaint: ${dState.setpoint || 'Unknown'}
+Active fault codes: ${dState.codes.join(', ') || 'None reported'}
+Problem statement: ${dState.problem}
+Prior diagnostics noted by tech: ${dState.priorDiag || 'None'}
+
+YOUR DIAGNOSTIC APPROACH:
+1. ALWAYS start with fundamentals — airflow, refrigerant charge, oil level, belt condition, electrical connections — before chasing specific fault codes. Do not skip basics.
+2. Do NOT trust prior diagnostics. Acknowledge them but re-verify everything from scratch. State this clearly to the tech.
+3. Guide the tech step-by-step. Ask ONE clear question or give ONE clear instruction at a time. Wait for their response before proceeding.
+4. When referencing service manual procedures, say so explicitly. For general transport refrigeration knowledge, note it as standard practice.
+5. If you reference community knowledge or field experience that is unverified, clearly flag it as: [COMMUNITY — UNVERIFIED] at the start of that message.
+6. Be direct and practical. Techs are experienced — no need to over-explain basics, but be thorough in your logic.
+7. When you identify a likely root cause, explain your reasoning clearly before recommending a fix.
+8. Keep responses concise. One step at a time. This is a live diagnostic conversation.
+
+TONE: Professional, direct, collaborative. You are a knowledgeable colleague, not a manual reader.`;
+}
+
+async function dCallClaude(userMessage) {
+  dState.chatHistory.push({ role: 'user', content: userMessage });
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: dBuildSystemPrompt(),
+      messages: dState.chatHistory
+    })
+  });
+  const data = await response.json();
+  const reply = data.content?.[0]?.text || 'No response received.';
+  dState.chatHistory.push({ role: 'assistant', content: reply });
+  return reply;
+}
+
+function dGoStep(n) {
+  ['ds0','ds1','ds2','ds3','ds4','dsAdmin'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('visible');
+  });
+  for (let i = 0; i < 5; i++) {
+    const sp = document.getElementById('dsp' + i);
+    if(!sp) continue;
+    sp.classList.remove('active','done');
+    if (i < n) sp.classList.add('done');
+  }
+  const screen = document.getElementById('ds' + n);
+  if(screen) screen.classList.add('visible');
+  if (n < 5) { const sp = document.getElementById('dsp' + n); if(sp) sp.classList.add('active'); }
+}
+
+function dShowAdmin() {
+  ['ds0','ds1','ds2','ds3','ds4'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('visible'); });
+  document.getElementById('dsAdmin').classList.add('visible');
+}
+
+function dNewSession() {
+  dState.chatHistory = [];
+  const cb = document.getElementById('dChatBox'); if(cb) cb.innerHTML = '';
+  ['dUnitModel','dSerial','dYear','dHours','dSetpoint','dProblem','dPriorDiag'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  const cl = document.getElementById('dCodeList');
+  if(cl) cl.innerHTML = `<div class="d-code-entry"><span class="d-code-tag">CODE</span><input type="text" placeholder="e.g. 26 — High Discharge Pressure" style="flex:1;" /><button class="d-rm-btn" onclick="dRemoveCode(this)"><i class="ti ti-x"></i></button></div>`;
+  dGoStep(0);
+}
+
+function dUpdateBadge() {
+  const make = document.getElementById('dMake')?.value || '';
+  const model = document.getElementById('dUnitModel')?.value || '';
+  const ul = document.getElementById('dUnitLabel'); if(ul) ul.textContent = model ? `${make} ${model}` : '—';
+  const yr = document.getElementById('dYear')?.value || '';
+  const ser = document.getElementById('dSerial')?.value || '';
+  const um = document.getElementById('dUnitMeta'); if(um) um.textContent = [yr, ser ? 'S/N: '+ser : ''].filter(Boolean).join(' · ') || '—';
+}
+
+async function dHandlePhoto(event) {
+  const file = event.target.files[0]; if(!file) return;
+  document.getElementById('dPhotoPreview').style.display = 'block';
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result.split(',')[1];
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:300, messages:[{ role:'user', content:[
+          { type:'image', source:{ type:'base64', media_type:file.type, data:base64 }},
+          { type:'text', text:'This is a photo of a transport refrigeration unit data plate. Extract: make, model, serial number, and year if visible. Respond in this exact format:\nMAKE: [value]\nMODEL: [value]\nSERIAL: [value]\nYEAR: [value or Unknown]' }
+        ]}]})
+      });
+      const data = await response.json();
+      const text = data.content?.[0]?.text || '';
+      const lines = text.split('\n');
+      const get = (key) => { const l = lines.find(x => x.startsWith(key+':')); return l ? l.replace(key+':','').trim() : ''; };
+      const make=get('MAKE'), model=get('MODEL'), serial=get('SERIAL'), year=get('YEAR');
+      document.getElementById('dIdentifiedUnit').innerHTML = `<i class="ti ti-circle-check" style="color:var(--green);"></i><div><strong>${make} ${model}</strong><br><span>Serial: ${serial} · Year: ${year}</span></div>`;
+      document.getElementById('dMake').value = make;
+      document.getElementById('dUnitModel').value = model;
+      document.getElementById('dSerial').value = serial;
+      document.getElementById('dYear').value = year !== 'Unknown' ? year : '';
+      dUpdateBadge();
+    } catch(err) {
+      document.getElementById('dIdentifiedUnit').innerHTML = `<i class="ti ti-alert-triangle" style="color:#92400e;"></i><div><strong>Could not identify</strong><br><span>Please enter manually below</span></div>`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function dReadCodes() {
+  return Array.from(document.querySelectorAll('#dCodeList .d-code-entry input')).map(i=>i.value.trim()).filter(Boolean);
+}
+
+async function dStartDiagnosis() {
+  dState.make = document.getElementById('dMake').value;
+  dState.model = document.getElementById('dUnitModel').value || 'Unknown model';
+  dState.serial = document.getElementById('dSerial').value;
+  dState.year = document.getElementById('dYear').value;
+  dState.hours = document.getElementById('dHours').value;
+  dState.setpoint = document.getElementById('dSetpoint').value;
+  dState.codes = dReadCodes();
+  dState.problem = document.getElementById('dProblem').value;
+  dState.priorDiag = document.getElementById('dPriorDiag').value;
+  dState.chatHistory = [];
+
+  document.getElementById('dDiagSubtitle').textContent = `${dState.make} ${dState.model}${dState.hours ? ' · '+Number(dState.hours).toLocaleString()+' hrs' : ''}${dState.codes.length ? ' · '+dState.codes.join(', ') : ''}`;
+  document.getElementById('doc-unit').textContent = dState.model;
+  document.getElementById('doc-make').textContent = dState.make + (dState.year ? ' · '+dState.year : '');
+  document.getElementById('doc-hours').textContent = dState.hours ? Number(dState.hours).toLocaleString() : '—';
+  document.getElementById('doc-codes').textContent = dState.codes.join(', ') || 'No codes';
+
+  dGoStep(2);
+  const opener = `I have a ${dState.make} ${dState.model}${dState.year ? ' ('+dState.year+')' : ''} with ${dState.hours ? Number(dState.hours).toLocaleString()+' hours' : 'unknown hours'} on it. ${dState.codes.length ? 'Active codes: '+dState.codes.join(', ')+'. ' : ''}Problem: ${dState.problem}${dState.priorDiag ? ' Prior work done: '+dState.priorDiag : ''}. Please start the diagnostic.`;
+  dAppendTyping();
+  try {
+    const reply = await dCallClaude(opener);
+    dRemoveTyping(); dAppendAI(reply);
+  } catch(e) { dRemoveTyping(); dAppendAI('Could not connect to the diagnostic AI. Please check your connection and try again.'); }
+}
+
+function dAppendAI(text) {
+  const box = document.getElementById('dChatBox');
+  const isCommunity = text.includes('[COMMUNITY') || text.includes('UNVERIFIED');
+  const div = document.createElement('div'); div.className = 'd-msg';
+  div.innerHTML = `<div class="d-av ai">AI</div><div><div class="d-bubble${isCommunity?' d-bubble-community':''}">${text.replace(/\[COMMUNITY.*?UNVERIFIED\]/g,'').replace(/\n/g,'<br>')}</div>${isCommunity ? '<div class="d-source-tag"><span class="sdot sdot-community"></span> Community reported · unverified</div>' : '<div class="d-source-tag"><span class="sdot sdot-manual"></span> Service knowledge</div>'}</div>`;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
+}
+function dAppendTech(text) {
+  const box = document.getElementById('dChatBox');
+  const div = document.createElement('div'); div.className = 'd-msg user';
+  div.innerHTML = `<div class="d-av tech">TECH</div><div><div class="d-bubble">${text.replace(/\n/g,'<br>')}</div></div>`;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
+}
+function dAppendTyping() {
+  const box = document.getElementById('dChatBox');
+  const div = document.createElement('div'); div.className = 'd-msg'; div.id = 'dTypingMsg';
+  div.innerHTML = `<div class="d-av ai">AI</div><div class="d-bubble d-typing"><span></span><span></span><span></span></div>`;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
+}
+function dRemoveTyping() { const t=document.getElementById('dTypingMsg'); if(t) t.remove(); }
+
+async function dSendTech() {
+  const input = document.getElementById('dTechInput');
+  const val = input.value.trim(); if(!val) return;
+  input.value = '';
+  document.getElementById('dSendBtn').disabled = true;
+  dAppendTech(val); dAppendTyping();
+  try {
+    const reply = await dCallClaude(val);
+    dRemoveTyping(); dAppendAI(reply);
+  } catch(e) { dRemoveTyping(); dAppendAI('Connection error. Please try again.'); }
+  document.getElementById('dSendBtn').disabled = false;
+  document.getElementById('dTechInput').focus();
+}
+function dHandleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();dSendTech();} }
+
+function dGenerateWO() {
+  dState.rootCause = document.getElementById('dRootCause').value;
+  dState.fixPerformed = document.getElementById('dFixPerformed').value;
+  dState.parts = document.getElementById('dPartsReplaced').value;
+  dState.labour = document.getElementById('dLabourHours').value;
+  dState.techNotes = document.getElementById('dTechNotes').value;
+  const today = new Date().toLocaleDateString('en-CA', {year:'numeric',month:'long',day:'numeric'});
+  const rows = [
+    ['Date',today],['Make',dState.make],['Model',dState.model],
+    ['Serial',dState.serial||'—'],['Year',dState.year||'—'],
+    ['Engine hours',dState.hours?Number(dState.hours).toLocaleString():'—'],
+    ['Setpoint',dState.setpoint||'—'],['Fault codes',dState.codes.join(', ')||'None'],
+    ['Complaint',dState.problem||'—'],['Root cause',dState.rootCause||'—'],
+    ['Fix performed',dState.fixPerformed||'—'],['Parts replaced',dState.parts||'—'],
+    ['Labour actual',dState.labour?dState.labour+' hrs':'—'],['Tech notes',dState.techNotes||'—']
+  ];
+  document.getElementById('dWoRows').innerHTML = rows.map(([k,v]) => `<div class="d-wo-row"><span class="d-wo-key">${k}</span><span class="d-wo-val">${v}</span></div>`).join('');
+  dGoStep(4);
+}
+
+function dExportText() {
+  const content = `Cold Fleet Analytics — Diagnostic Work Order\n\nMake: ${dState.make}\nModel: ${dState.model}\nSerial: ${dState.serial||'—'}\nYear: ${dState.year||'—'}\nHours: ${dState.hours||'—'}\nSetpoint: ${dState.setpoint||'—'}\nCodes: ${dState.codes.join(', ')||'None'}\n\nCOMPLAINT:\n${dState.problem||'—'}\n\nROOT CAUSE:\n${dState.rootCause||'—'}\n\nFIX PERFORMED:\n${dState.fixPerformed||'—'}\n\nPARTS REPLACED:\n${dState.parts||'—'}\n\nLABOUR ACTUAL: ${dState.labour||'—'} hrs\n\nTECH NOTES:\n${dState.techNotes||'—'}`.trim();
+  const blob = new Blob([content],{type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `workorder-${dState.model.replace(/\s+/g,'-')}-${Date.now()}.txt`;
+  a.click();
+}
+
+function dAddCode() {
+  const list = document.getElementById('dCodeList');
+  const div = document.createElement('div'); div.className = 'd-code-entry';
+  div.innerHTML = `<span class="d-code-tag">CODE</span><input type="text" placeholder="e.g. 41 — Evap Fan Fault" style="flex:1;" /><button class="d-rm-btn" onclick="dRemoveCode(this)"><i class="ti ti-x"></i></button>`;
+  list.appendChild(div);
+}
+function dRemoveCode(btn) { btn.closest('.d-code-entry').remove(); }
+function dApprove(btn) { btn.closest('.d-pending-item').style.opacity='0.4'; btn.textContent='Approved'; btn.disabled=true; }
+function dReject(btn) { btn.closest('.d-pending-item').remove(); }
+
+/* ── UPDATED TOOL SWITCHER (3 tools) ── */
+function switchTool(id, cardEl) {
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+  if(cardEl) cardEl.classList.add('active');
+  document.getElementById('tool-tco').style.display   = id === 'tco'   ? 'block' : 'none';
+  document.getElementById('tool-diag').style.display  = id === 'diag'  ? 'block' : 'none';
+  document.getElementById('tool-audit').style.display = id === 'audit' ? 'block' : 'none';
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════
+     INVOICE AUDITOR TOOL
+════════════════════════════════════════════════════ -->
+<style>
+#tool-audit {
+  display: none;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 56px 80px;
+}
+#tool-audit .audit-hero {
+  padding: 40px 0 28px;
+  border-bottom: 1px solid var(--cream-mid);
+  margin-bottom: 28px;
+}
+#tool-audit .audit-hero h2 {
+  font-family: var(--serif);
+  font-size: 28px; font-weight: 600;
+  letter-spacing: -0.5px; color: var(--brown);
+  margin-bottom: 8px;
+}
+#tool-audit .audit-hero h2 em { font-style: italic; color: var(--green); }
+#tool-audit .audit-hero p { font-size: 15px; color: var(--brown-mid); line-height: 1.8; max-width: 560px; }
+
+/* rate bar */
+#tool-audit .rate-bar {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--white); border: 1px solid var(--cream-mid);
+  border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;
+}
+#tool-audit .rate-bar label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--brown-light); white-space: nowrap;
+}
+#tool-audit .rate-bar input[type=number] {
+  width: 90px; background: var(--cream); border: 1px solid var(--cream-mid);
+  border-radius: 6px; padding: 8px 10px; font-size: 14px;
+  font-family: var(--sans); color: var(--brown); outline: none;
+}
+#tool-audit .rate-bar input:focus { border-color: var(--green); }
+#tool-audit .rate-display { font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--green); }
+#tool-audit .rate-hint { font-size: 12px; color: var(--brown-light); margin-left: auto; }
+
+/* tabs */
+#tool-audit .a-tabs {
+  background: var(--white); border: 1px solid var(--cream-mid);
+  border-radius: 12px 12px 0 0; padding: 0 20px;
+  display: flex; gap: 2px; overflow-x: auto;
+}
+#tool-audit .a-tab {
+  padding: 13px 16px; font-size: 13px; font-weight: 500;
+  color: var(--brown-light); cursor: pointer;
+  border-bottom: 2px solid transparent; white-space: nowrap;
+  transition: color .2s, border-color .2s;
+  font-family: var(--sans); background: none;
+  border-top: none; border-left: none; border-right: none;
+  display: flex; align-items: center; gap: 6px;
+}
+#tool-audit .a-tab:hover:not(.active) { color: var(--brown-mid); }
+#tool-audit .a-tab.active { color: var(--brown); border-bottom-color: var(--green); }
+
+/* content */
+#tool-audit .a-content {
+  padding: 28px; background: var(--white);
+  border: 1px solid var(--cream-mid); border-top: none;
+  border-radius: 0 0 12px 12px;
+}
+#tool-audit .a-pane { display: none; }
+#tool-audit .a-pane.active { display: block; animation: fadeUp .25s ease; }
+
+/* fields */
+#tool-audit .a-sec {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--brown-light);
+  margin-bottom: 10px; margin-top: 22px;
+}
+#tool-audit .a-sec:first-child { margin-top: 0; }
+#tool-audit .a-sep { border: none; border-top: 1px solid var(--cream-mid); margin: 18px 0; }
+#tool-audit .a-field { display: flex; flex-direction: column; gap: 5px; }
+#tool-audit .a-field label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--brown-light);
+}
+#tool-audit textarea, #tool-audit select {
+  background: var(--cream); border: 1px solid var(--cream-mid);
+  border-radius: 6px; padding: 9px 11px;
+  font-size: 13px; font-family: var(--sans);
+  color: var(--brown); width: 100%; outline: none; transition: border-color .2s;
+}
+#tool-audit textarea { resize: vertical; min-height: 140px; line-height: 1.6; }
+#tool-audit textarea:focus, #tool-audit select:focus { border-color: var(--green); }
+#tool-audit textarea::placeholder { color: var(--brown-faint); }
+
+/* layout */
+#tool-audit .analyze-grid { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
+#tool-audit .tip-card {
+  background: var(--cream); border: 1px solid var(--cream-mid);
+  border-radius: 8px; padding: 14px 16px; font-size: 12px;
+  color: var(--brown-mid); line-height: 1.7; margin-bottom: 10px;
+}
+#tool-audit .tip-card strong { display: block; font-size: 11px; font-family: var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 6px; }
+#tool-audit .tip-examples { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+#tool-audit .tip-examples li::before { content: '→ '; color: var(--green); }
+
+/* buttons */
+#tool-audit .a-btn {
+  padding: 9px 18px; border-radius: 6px;
+  font-size: 13px; font-family: var(--sans); font-weight: 500;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--cream-mid); background: var(--white); color: var(--brown-mid);
+  transition: all .2s;
+}
+#tool-audit .a-btn:hover { border-color: var(--brown-light); color: var(--brown); }
+#tool-audit .a-btn-primary { background: var(--green); color: white; border: none; }
+#tool-audit .a-btn-primary:hover { background: var(--green-light); }
+#tool-audit .a-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+#tool-audit .a-btn-sm { padding: 5px 11px; font-size: 11px; }
+
+/* results */
+#tool-audit .result-card { background: var(--white); border: 1px solid var(--cream-mid); border-radius: 12px; overflow: hidden; margin-top: 20px; }
+#tool-audit .result-header { padding: 16px 20px; background: var(--cream); border-bottom: 1px solid var(--cream-mid); display: flex; justify-content: space-between; align-items: center; }
+#tool-audit .result-header h3 { font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--brown); }
+#tool-audit .result-body { padding: 20px; }
+#tool-audit .summary-box {
+  background: var(--cream); border: 1px solid var(--cream-mid);
+  border-left: 3px solid var(--green); border-radius: 8px;
+  padding: 14px 18px; font-size: 13px; line-height: 1.75;
+  margin-bottom: 16px; color: var(--brown);
+}
+#tool-audit .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 18px; }
+#tool-audit .a-kpi { background: var(--cream); border: 1px solid var(--cream-mid); border-radius: 8px; padding: 14px 16px; }
+#tool-audit .a-kpi-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brown-light); margin-bottom: 5px; }
+#tool-audit .a-kpi-val { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--brown); }
+#tool-audit .a-kpi-val.good { color: var(--green); }
+#tool-audit .a-kpi-val.warn { color: #92400e; }
+#tool-audit .a-kpi-val.bad { color: var(--red); }
+#tool-audit .a-kpi-sub { font-size: 11px; color: var(--brown-mid); margin-top: 3px; }
+
+/* table */
+#tool-audit table { width: 100%; border-collapse: collapse; font-size: 12px; }
+#tool-audit thead th { text-align: left; padding: 7px 10px; font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--brown-light); border-bottom: 1px solid var(--cream-mid); background: var(--cream); white-space: nowrap; }
+#tool-audit tbody td { padding: 8px 10px; border-bottom: 1px solid var(--cream-mid); vertical-align: middle; color: var(--brown); }
+#tool-audit tbody tr:last-child td { border-bottom: none; }
+#tool-audit tbody tr:hover { background: var(--cream); }
+#tool-audit .anum { text-align: right; font-family: var(--mono); }
+
+/* badges */
+#tool-audit .a-badge { display: inline-block; font-size: 10px; font-weight: 600; font-family: var(--mono); padding: 2px 8px; border-radius: 4px; letter-spacing: .04em; }
+#tool-audit .b-ok { background: rgba(26,92,58,.1); color: var(--green); border: 1px solid rgba(26,92,58,.2); }
+#tool-audit .b-slightly { background: rgba(146,64,14,.08); color: #92400e; border: 1px solid rgba(146,64,14,.2); }
+#tool-audit .b-over { background: rgba(185,28,28,.08); color: var(--red); border: 1px solid rgba(185,28,28,.2); }
+#tool-audit .b-na { background: var(--cream); color: var(--brown-light); border: 1px solid var(--cream-mid); }
+#tool-audit .b-parts-ok { background: rgba(26,92,58,.08); color: var(--green); }
+#tool-audit .b-parts-high { background: rgba(185,28,28,.08); color: var(--red); }
+#tool-audit .b-parts-low { background: rgba(146,64,14,.08); color: #92400e; }
+
+/* log */
+#tool-audit .log-entry { border: 1px solid var(--cream-mid); border-radius: 8px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 14px; transition: border-color .2s; }
+#tool-audit .log-entry:hover { border-color: var(--brown-light); }
+#tool-audit .log-entry-main { flex: 1; }
+#tool-audit .log-entry-date { font-family: var(--mono); font-size: 10px; color: var(--brown-light); margin-bottom: 3px; }
+#tool-audit .log-entry-desc { font-size: 13px; color: var(--brown); font-weight: 500; }
+#tool-audit .log-entry-meta { font-size: 11px; color: var(--brown-mid); margin-top: 2px; }
+
+/* stats callout */
+#tool-audit .stats-callout { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 14px; }
+#tool-audit .stat-item { background: var(--white); border: 1px solid var(--cream-mid); border-radius: 8px; padding: 12px 14px; text-align: center; }
+#tool-audit .stat-num { font-family: var(--serif); font-size: 24px; font-weight: 600; color: var(--green); }
+#tool-audit .stat-lbl { font-family: var(--mono); font-size: 10px; color: var(--brown-light); letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+
+/* SRT */
+#tool-audit .srt-section { margin-bottom: 20px; }
+#tool-audit .srt-section-header { font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--brown); padding: 8px 0; margin-bottom: 6px; border-bottom: 1px solid var(--cream-mid); display: flex; justify-content: space-between; align-items: center; }
+#tool-audit .srt-units { font-family: var(--mono); font-size: 10px; color: var(--brown-light); }
+
+/* loading */
+#tool-audit .loading-wrap { display: flex; align-items: center; gap: 10px; padding: 16px 0; color: var(--brown-mid); font-size: 13px; }
+#tool-audit .a-dots { display: flex; gap: 4px; }
+#tool-audit .a-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.2s infinite; }
+#tool-audit .a-dots span:nth-child(2) { animation-delay: .2s; }
+#tool-audit .a-dots span:nth-child(3) { animation-delay: .4s; }
+#tool-audit .a-empty { text-align: center; padding: 40px 20px; color: var(--brown-light); font-size: 13px; }
+
+@media(max-width:768px) {
+  #tool-audit { padding: 0 16px 60px; }
+  #tool-audit .analyze-grid { grid-template-columns: 1fr; }
+  #tool-audit .kpi-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<div id="tool-audit">
+  <div class="audit-hero">
+    <h2>Are you paying <em>fair rates?</em></h2>
+    <p>Paste any repair invoice or estimate. We check every line against Carrier Transicold's official SRT schedule and flag what's over, under, or worth pushing back on.</p>
+  </div>
+
+  <!-- RATE BAR -->
+  <div class="rate-bar">
+    <label>Shop Labor Rate ($/hr)</label>
+    <input type="number" id="aLaborRate" value="95" min="50" max="250" step="5" oninput="aUpdateRateDisplay()">
+    <span class="rate-display" id="aRateDisplay">$95/hr</span>
+    <span class="rate-hint">Used for all SRT cost calculations</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="a-tabs">
+    <button class="a-tab active" onclick="aShowTab('analyze')">📋 Analyze Invoice</button>
+    <button class="a-tab" onclick="aShowTab('log')">📂 Invoice Log</button>
+    <button class="a-tab" onclick="aShowTab('srt')">📖 SRT Reference</button>
+  </div>
+
+  <div class="a-content">
+
+    <!-- ANALYZE PANE -->
+    <div id="a-pane-analyze" class="a-pane active">
+      <div class="a-sec">Paste invoice text or describe the repair</div>
+      <div class="analyze-grid">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="a-field">
+            <label>Invoice / Estimate</label>
+            <textarea id="aInvoiceText" placeholder="Paste invoice text here, or describe the repair in plain English.
+
+Examples:
+• Compressor R&R – 6.0 hrs labor @ $120/hr = $720, parts $1,840
+• Estimate for evaporator coil replacement on Vector 8500
+• Line 1: Filter drier R&R 0.5hr $47.50 | Line 2: Evacuate & charge 1.5hr $142.50"></textarea>
+          </div>
+          <div class="a-field">
+            <label>Unit model (optional — improves accuracy)</label>
+            <select id="aUnitModel">
+              <option value="">— Select unit family —</option>
+              <option value="Vector 8500/8600">Vector 8500 / 8600</option>
+              <option value="X4 7300">X4 7300</option>
+              <option value="X4 7500">X4 7500</option>
+              <option value="X2 2100">X2 2100 APX</option>
+              <option value="X2 2500">X2 2500 APX</option>
+              <option value="X Series XT">X Series XT/XTC</option>
+              <option value="Non-X Series">Non-X Series</option>
+            </select>
+          </div>
+          <button class="a-btn a-btn-primary" id="aAnalyzeBtn" onclick="aAnalyzeInvoice()">
+            ⚡ Analyze against SRT
+          </button>
+          <div id="aAnalyzeLoading" style="display:none">
+            <div class="loading-wrap">
+              <div class="a-dots"><span></span><span></span><span></span></div>
+              Analyzing against SRT schedule…
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="tip-card">
+            <strong>What works well</strong>
+            <ul class="tip-examples">
+              <li>Pasted invoice text (any format)</li>
+              <li>Photo-to-text transcriptions</li>
+              <li>Plain English estimates</li>
+              <li>"Estimate for compressor R&R on X4 7500"</li>
+            </ul>
+          </div>
+          <div class="tip-card">
+            <strong>What you'll get</strong>
+            <ul class="tip-examples">
+              <li>SRT match for each line item</li>
+              <li>Expected vs charged labor hours</li>
+              <li>Parts cost flag (high / low / normal)</li>
+              <li>Repairs commonly done together</li>
+              <li>Plain-English summary to use in negotiation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div id="aAnalyzeResult" style="display:none"></div>
+    </div>
+
+    <!-- LOG PANE -->
+    <div id="a-pane-log" class="a-pane">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div>
+          <div class="a-sec" style="margin:0 0 4px;">Saved Analyses</div>
+          <p style="font-size:12px;color:var(--brown-mid);">Every analysis is logged here. As history grows, patterns and averages will surface.</p>
+        </div>
+        <button class="a-btn a-btn-sm" onclick="aClearLog()">Clear log</button>
+      </div>
+      <div id="aLogStats" style="display:none">
+        <div class="stats-callout" id="aLogStatsInner"></div>
+        <div class="a-sep"></div>
+      </div>
+      <div id="aLogList"></div>
+    </div>
+
+    <!-- SRT REFERENCE PANE -->
+    <div id="a-pane-srt" class="a-pane">
+      <div class="a-sec" style="margin-top:0">Carrier Transicold SRT Schedule — 62-10069 Rev B</div>
+      <div style="margin-bottom:14px;">
+        <input type="text" id="aSrtSearch" placeholder="Search by code or description (e.g. C1-A, compressor, filter drier…)" oninput="aRenderSRT()" style="background:var(--cream);border:1px solid var(--cream-mid);border-radius:6px;padding:9px 11px;font-size:13px;font-family:var(--sans);color:var(--brown);width:100%;outline:none;">
+      </div>
+      <div id="aSrtTable"></div>
+    </div>
+
+  </div><!-- /a-content -->
+</div><!-- /tool-audit -->
+
+<script>
+/* ═══════════════════════════════
+   INVOICE AUDITOR JS — all prefixed a
+═══════════════════════════════ */
+const SRT_DATA = {
+  "Vector 8500/8600": {
+    units: ["69NT40-511","69NT40-541"],
+    codes: [
+      {code:"C1-A",desc:"Compressor R&R (diesel system check seized)",times:[4.0,4.0]},
+      {code:"C10-A",desc:"Front cylinder head/defective pistons R&R",times:[4.0,4.0]},
+      {code:"C10-B",desc:"All cylinder heads/severe overheat R&R",times:[5.0,5.0]},
+      {code:"C11-A",desc:"All valve plates R&R",times:[2.5,2.5]},
+      {code:"C2-A",desc:"Shaft seal R&R",times:[4.5,4.5]},
+      {code:"C3-A",desc:"One (1) valve plate R&R",times:[2.5,2.5]},
+      {code:"D1-A",desc:"Fan shaft assembly R&R",times:[5.0,5.0]},
+      {code:"D3-D",desc:"Evaporator blower wheel R&R",times:[1.0,1.0]},
+      {code:"D8-C",desc:"Both nylon & steel gears set R&R",times:[4.1,4.1]},
+      {code:"D10-B",desc:"Alternator belt R&R",times:[0.7,0.7]},
+      {code:"D11-A",desc:"Clutch (entire assembly) R&R",times:[1.3,1.3]},
+      {code:"R1-A",desc:"Condenser coil R&R",times:[4.0,4.0]},
+      {code:"R11-A",desc:"Filter drier R&R",times:[0.25,0.25]},
+      {code:"R21-A",desc:"Evaporator coil R&R",times:[9.6,9.6]},
+      {code:"R22-A",desc:"Heat exchanger R&R",times:[4.5,4.5]},
+      {code:"R23-C",desc:"TXV (solid body brazed-in) R&R",times:[1.8,1.8]},
+      {code:"R23-D",desc:"SMV Piston & coil assembly R&R",times:[1.0,1.0]},
+      {code:"R41-A",desc:"Repair any high side braze joint",times:[1.8,1.8]},
+      {code:"R41-B",desc:"Repair any low side braze joint",times:[0.8,0.8]},
+      {code:"R44-A",desc:"Evacuate & charge system",times:[1.0,1.0]},
+      {code:"S4-B",desc:"Return air or supply air temperature sensor R&R",times:[1.4,1.4]},
+      {code:"S27-A",desc:"Engine coolant temperature sensor R&R",times:[1.2,1.2]},
+      {code:"S29-A",desc:"Defrost air switch (DAS) R&R",times:[0.7,0.7]},
+      {code:"S30-A",desc:"Defrost termination temperature sensor (DTT) R&R",times:[1.4,1.4]},
+      {code:"S45-A",desc:"Alternator R&R",times:[1.0,1.0]},
+      {code:"S61-A",desc:"Main microprocessor module (MM) R&R",times:[1.0,1.0]},
+      {code:"W1-A",desc:"Water pump R&R",times:[2.5,2.5]},
+      {code:"W2-A",desc:"Engine thermostat R&R",times:[1.0,1.0]},
+      {code:"W3-A",desc:"Upper radiator hose R&R",times:[1.4,1.4]},
+      {code:"W3-B",desc:"Lower radiator hose R&R",times:[1.7,1.7]},
+      {code:"W10-A",desc:"Flush coolant system",times:[1.2,1.2]},
+    ]
+  },
+  "X4 7300/7500": {
+    units: ["69RG40","69RG50"],
+    codes: [
+      {code:"C1-A",desc:"Compressor R&R (05G diesel system check seized)",times:[4.5,4.5]},
+      {code:"C2-A",desc:"Shaft seal R&R (Includes C9-A & R44-A)",times:[4.5,4.5]},
+      {code:"C3-A",desc:"One (1) valve plate R&R",times:[1.2,1.2]},
+      {code:"C3-B",desc:"Two (2) valve plates R&R",times:[1.5,1.5]},
+      {code:"C4-A",desc:"Cylinder unloader R&R",times:[0.7,0.7]},
+      {code:"C9-A",desc:"Add compressor oil",times:[0.25,0.25]},
+      {code:"D1-A",desc:"Fan shaft assembly R&R",times:[4.0,4.0]},
+      {code:"D2-A",desc:"Condenser fan blade R&R",times:[1.0,1.0]},
+      {code:"D3-D",desc:"Evaporator blower wheel R&R",times:[1.0,1.0]},
+      {code:"D5-A",desc:"Condenser fan belt R&R",times:[0.6,0.6]},
+      {code:"D8-C",desc:"Both nylon & steel gears set R&R",times:[3.5,3.5]},
+      {code:"D10-B",desc:"Alternator belt R&R",times:[0.7,0.7]},
+      {code:"D11-A",desc:"Clutch (entire assembly) R&R",times:[1.5,1.5]},
+      {code:"R1-A",desc:"Condenser coil R&R",times:[4.0,4.0]},
+      {code:"R11-A",desc:"Filter drier R&R (incl R44-A)",times:[0.25,0.25]},
+      {code:"R21-A",desc:"Evaporator coil R&R",times:[9.6,9.6]},
+      {code:"R22-A",desc:"Heat exchanger (BPHX) R&R",times:[2.0,2.0]},
+      {code:"R23-D",desc:"SMV piston & coil assembly R&R",times:[1.4,1.4]},
+      {code:"R23-F",desc:"Electronic Exp Valve (EVXV) R&R",times:[1.8,1.8]},
+      {code:"R41-A",desc:"Repair any high side braze joint",times:[1.8,1.8]},
+      {code:"R41-B",desc:"Repair any low side braze joint",times:[0.8,0.8]},
+      {code:"R44-A",desc:"Evacuate & charge system",times:[1.0,1.0]},
+      {code:"S4-A",desc:"Temperature sensor (ATS/RAS) R&R",times:[0.4,0.4]},
+      {code:"S4-B",desc:"Temperature sensor (SAS) R&R",times:[1.4,1.4]},
+      {code:"S27-A",desc:"Water temperature sensor R&R",times:[1.0,1.0]},
+      {code:"S45-A",desc:"Alternator R&R",times:[1.0,1.2]},
+      {code:"S61-A",desc:"Micro R&R (advance)",times:[1.7,1.3]},
+      {code:"W1-A",desc:"Water pump R&R",times:[2.2,2.2]},
+      {code:"W2-A",desc:"Engine thermostat R&R",times:[1.0,1.0]},
+      {code:"W3-A",desc:"Upper radiator hose R&R",times:[0.6,0.6]},
+      {code:"W10-A",desc:"Flush coolant system",times:[1.2,1.2]},
+    ]
+  },
+  "X2 2100/2500 APX": {
+    units: ["69NT40-541-C1","69NT40-521"],
+    codes: [
+      {code:"C1-A",desc:"Compressor R&R",times:[3.0,3.0]},
+      {code:"C2-A",desc:"Shaft seal R&R",times:[2.5,2.5]},
+      {code:"C3-A",desc:"One (1) valve plate R&R",times:[1.2,1.2]},
+      {code:"D3-D",desc:"Evaporator blower wheel R&R",times:[1.0,1.0]},
+      {code:"D10-B",desc:"Alternator belt R&R",times:[0.5,0.5]},
+      {code:"R1-A",desc:"Condenser coil R&R",times:[3.5,3.5]},
+      {code:"R11-A",desc:"Filter drier R&R",times:[0.25,0.25]},
+      {code:"R21-A",desc:"Evaporator coil R&R",times:[8.0,8.0]},
+      {code:"R22-A",desc:"Heat exchanger R&R",times:[3.0,3.0]},
+      {code:"R23-C",desc:"TXV (solid body brazed-in) R&R",times:[1.8,1.8]},
+      {code:"R41-A",desc:"Repair any high side braze joint",times:[1.8,1.8]},
+      {code:"R44-A",desc:"Evacuate & charge system",times:[1.0,1.0]},
+      {code:"S45-A",desc:"Alternator R&R",times:[1.0,1.0]},
+      {code:"W1-A",desc:"Water pump R&R",times:[2.5,2.5]},
+      {code:"W2-A",desc:"Engine thermostat R&R",times:[1.0,1.0]},
+      {code:"W10-A",desc:"Flush coolant system",times:[1.2,1.2]},
+    ]
+  },
+  "X Series (XT/XTC)": {
+    units: ["NDL93E/N/M","NDL93P/93N"],
+    codes: [
+      {code:"C1-A",desc:"Compressor R&R (05G engine seized)",times:[5.0,4.5]},
+      {code:"C2-A",desc:"Shaft seal R&R",times:[4.5,4.5]},
+      {code:"C3-A",desc:"One (1) valve plate R&R",times:[1.2,1.2]},
+      {code:"D1-A",desc:"Fan shaft assembly R&R",times:[5.0,5.0]},
+      {code:"D3-D",desc:"Evaporator blower wheel R&R",times:[1.0,1.0]},
+      {code:"D10-B",desc:"Alternator belt R&R",times:[0.7,0.7]},
+      {code:"R1-A",desc:"Condenser coil R&R",times:[4.0,4.0]},
+      {code:"R11-A",desc:"Filter drier R&R",times:[0.25,0.25]},
+      {code:"R21-A",desc:"Evaporator coil R&R",times:[9.6,9.6]},
+      {code:"R22-A",desc:"Heat exchanger R&R",times:[4.5,4.5]},
+      {code:"R23-C",desc:"TXV (solid body brazed-in) R&R",times:[1.8,1.8]},
+      {code:"R41-A",desc:"Repair any high side braze joint",times:[1.8,1.8]},
+      {code:"R44-A",desc:"Evacuate & charge system",times:[1.0,1.0]},
+      {code:"S45-A",desc:"Alternator R&R",times:[1.0,1.0]},
+      {code:"S61-A",desc:"Main microprocessor module R&R",times:[1.0,1.0]},
+      {code:"W1-A",desc:"Water pump R&R",times:[2.5,2.5]},
+      {code:"W2-A",desc:"Engine thermostat R&R",times:[1.0,1.0]},
+      {code:"W10-A",desc:"Flush coolant system",times:[1.2,1.2]},
+    ]
+  },
+  "Non-X Series": {
+    units: ["69NT40-511-C","69NT40-521-B","69NT40-541-B","69NT40-561","69NT40-571","69NT40-581"],
+    codes: [
+      {code:"C1-A",desc:"Compressor R&R – diesel system check",times:[4.0,4.0,4.0,3.0,3.0,3.0]},
+      {code:"C3-A",desc:"One (1) valve plate R&R",times:[1.5,1.5,1.5,null,null,null]},
+      {code:"C3-B",desc:"Two (2) valve plates R&R",times:[1.8,1.8,1.8,null,null,null]},
+      {code:"C4-A",desc:"Cylinder unloader R&R",times:[0.7,0.7,0.7,null,null,null]},
+      {code:"D3-A",desc:"Evaporator fan blade R&R",times:[1.3,1.3,1.3,1.3,1.3,1.3]},
+      {code:"D4-A",desc:"Condenser Motor R&R",times:[1.0,0.75,0.75,0.75,0.75,0.75]},
+      {code:"D4-B",desc:"Evaporator Motor R&R",times:[1.5,1.5,1.5,1.5,1.5,1.5]},
+      {code:"R1-A",desc:"Condenser coil R&R",times:[4.0,3.5,3.5,4.0,4.0,4.0]},
+      {code:"R11-A",desc:"Filter drier R&R (incl R44-A)",times:[0.5,0.5,0.5,0.25,0.25,0.25]},
+      {code:"R21-A",desc:"Evaporator coil R&R",times:[10.6,10.6,10.6,10.6,10.6,10.6]},
+      {code:"R22-A",desc:"Heat exchanger R&R",times:[4.5,4.5,4.5,2.0,2.0,2.0]},
+      {code:"R23-F",desc:"Electronic expansion valve (EVXV) R&R",times:[1.8,1.8,1.8,1.8,1.8,1.8]},
+      {code:"R41-A",desc:"Repair any high side braze joint",times:[1.8,1.8,1.8,1.8,1.0,1.8]},
+      {code:"R41-B",desc:"Repair any low side braze joint",times:[0.8,0.8,0.8,0.8,0.8,0.8]},
+      {code:"R44-A",desc:"Evacuate & charge system",times:[1.0,1.0,1.0,1.0,1.0,1.0]},
+      {code:"S45-A",desc:"Alternator R&R",times:[1.0,1.0,1.0,1.0,1.0,1.0]},
+      {code:"S61-A",desc:"Microprocessor (advance) R&R",times:[1.0,1.0,1.0,1.0,1.0,1.0]},
+      {code:"W1-A",desc:"Water pump R&R",times:[2.5,2.5,2.5,2.5,2.5,2.5]},
+      {code:"W2-A",desc:"Engine thermostat R&R",times:[1.0,1.0,1.0,1.0,1.0,1.0]},
+      {code:"W10-A",desc:"Flush coolant system",times:[1.2,1.2,1.2,1.2,1.2,1.2]},
+    ]
+  }
+};
+
+function aEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function aFmt(n) { return '$' + Math.round(n).toLocaleString(); }
+function aFmtDec(n, d=1) { return Number(n).toFixed(d); }
+
+function aGetLaborRate() { return parseFloat(document.getElementById('aLaborRate').value) || 95; }
+function aUpdateRateDisplay() {
+  document.getElementById('aRateDisplay').textContent = '$' + (parseFloat(document.getElementById('aLaborRate').value)||95) + '/hr';
+}
+
+function aShowTab(name) {
+  document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.a-pane').forEach(p => p.classList.remove('active'));
+  const pane = document.getElementById('a-pane-'+name);
+  if(pane) pane.classList.add('active');
+  const tabs = document.querySelectorAll('.a-tab');
+  const map = {analyze:0, log:1, srt:2};
+  if(map[name] !== undefined) tabs[map[name]].classList.add('active');
+  if(name === 'srt') aRenderSRT();
+  if(name === 'log') aRenderLog();
+}
+
+function aGetAllCodes() {
+  const map = {};
+  Object.values(SRT_DATA).forEach(section => {
+    section.codes.forEach(row => {
+      if(!map[row.code]) {
+        const valid = row.times.filter(t => t !== null && t !== undefined);
+        map[row.code] = {
+          code: row.code, desc: row.desc,
+          avgTime: valid.length ? valid.reduce((a,b)=>a+b,0)/valid.length : 0,
+          minTime: valid.length ? Math.min(...valid) : 0,
+          maxTime: valid.length ? Math.max(...valid) : 0,
+        };
+      }
+    });
+  });
+  return map;
+}
+
+async function aAnalyzeInvoice() {
+  const text = document.getElementById('aInvoiceText').value.trim();
+  if(!text) { alert('Please paste an invoice or describe the repair.'); return; }
+
+  document.getElementById('aAnalyzeBtn').disabled = true;
+  document.getElementById('aAnalyzeLoading').style.display = 'block';
+  document.getElementById('aAnalyzeResult').style.display = 'none';
+
+  const laborRate = aGetLaborRate();
+  const unitModel = document.getElementById('aUnitModel').value;
+  const allCodes = aGetAllCodes();
+  const srtJson = JSON.stringify(allCodes, null, 2);
+
+  const prompt = `You are an expert Carrier Transicold reefer unit repair analyst helping fleet managers at Cold Fleet Analytics verify if repair invoices are fairly priced against official SRT (Standard Repair Time) guidelines. Your job is to help operators push back on overcharging with data.
+
+LABOR RATE: $${laborRate}/hr
+UNIT MODEL: ${unitModel || 'Unknown — use average SRT times across all families'}
+
+SRT DATA (code → avgTime hours):
+${srtJson}
+
+USER INPUT (invoice text or repair description):
+${text}
+
+Analyze the invoice and return ONLY valid JSON (no markdown, no preamble) with this exact structure:
+{
+  "summary": "2-3 sentence plain English summary of findings, written to help the fleet manager negotiate",
+  "totalInvoicedLaborCost": 0,
+  "totalSRTLaborCost": 0,
+  "totalPartsCost": 0,
+  "overallStatus": "ok|slightly_over|over",
+  "lineItems": [
+    {
+      "description": "what was done",
+      "srtCode": "code or null",
+      "srtMatch": "the SRT job description matched",
+      "invoicedHours": 0,
+      "srtHours": 0,
+      "invoicedLaborCost": 0,
+      "srtLaborCost": 0,
+      "laborStatus": "ok|slightly_over|over|no_match",
+      "partsCost": 0,
+      "partsStatus": "ok|high|low|unknown",
+      "partsNote": "brief note if parts pricing is unusual"
+    }
+  ],
+  "commonlyPairedRepairs": ["repairs commonly done at the same time that aren't on this invoice"],
+  "flags": ["any other notes worth flagging for the fleet manager"]
+}
+
+Rules:
+- invoicedHours: extract from invoice. If not given, estimate from cost ÷ labor rate.
+- srtHours: use avgTime from SRT data. If no match, set to null.
+- laborStatus "ok" = within 20% of SRT. "slightly_over" = 20-50% over. "over" = more than 50% over.
+- partsStatus: "high" if >30% above typical market. "low" if suspiciously cheap.
+- Never refuse. Always produce the JSON structure.`;
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000, messages:[{role:"user",content:prompt}] })
+    });
+    const data = await resp.json();
+    const raw = data.content?.map(b => b.text||'').join('');
+    const cleaned = raw.replace(/```json|```/g,'').trim();
+    const result = JSON.parse(cleaned);
+    aRenderResult(result, text, unitModel, laborRate);
+    aSaveToLog(result, text, unitModel, laborRate);
+  } catch(e) {
+    document.getElementById('aAnalyzeResult').style.display = 'block';
+    document.getElementById('aAnalyzeResult').innerHTML = `<div class="result-card"><div class="result-body"><p style="color:var(--red)">Analysis failed. Please check your connection and try again.</p><p style="font-size:11px;color:var(--brown-light);margin-top:6px;">${aEsc(String(e))}</p></div></div>`;
+  }
+  document.getElementById('aAnalyzeBtn').disabled = false;
+  document.getElementById('aAnalyzeLoading').style.display = 'none';
+}
+
+function aRenderResult(r, inputText, unitModel, laborRate) {
+  const el = document.getElementById('aAnalyzeResult');
+  el.style.display = 'block';
+  const diff = (r.totalInvoicedLaborCost||0) - (r.totalSRTLaborCost||0);
+  const diffPct = r.totalSRTLaborCost > 0 ? (diff/r.totalSRTLaborCost*100) : 0;
+  const overallClass = r.overallStatus==='ok'?'good':r.overallStatus==='slightly_over'?'warn':'bad';
+  const overallLabel = r.overallStatus==='ok'?'✓ Within SRT':r.overallStatus==='slightly_over'?'⚠ Slightly over SRT':'✗ Exceeds SRT';
+
+  let rows = '';
+  (r.lineItems||[]).forEach(item => {
+    const lBadge = {
+      ok: '<span class="a-badge b-ok">Within SRT</span>',
+      slightly_over: '<span class="a-badge b-slightly">Slightly over</span>',
+      over: '<span class="a-badge b-over">Exceeds SRT</span>',
+      no_match: '<span class="a-badge b-na">No match</span>',
+    }[item.laborStatus] || '<span class="a-badge b-na">—</span>';
+    const pBadge = {
+      ok: '<span class="a-badge b-parts-ok">Normal</span>',
+      high: '<span class="a-badge b-parts-high">High</span>',
+      low: '<span class="a-badge b-parts-low">Low</span>',
+    }[item.partsStatus] || '';
+    rows += `<tr>
+      <td><strong>${aEsc(item.description)}</strong>${item.srtCode?`<br><span style="font-family:var(--mono);font-size:10px;color:var(--brown-light)">${aEsc(item.srtCode)}</span>`:''}  </td>
+      <td class="anum">${item.invoicedHours!=null?aFmtDec(item.invoicedHours):'—'}</td>
+      <td class="anum">${item.srtHours!=null?aFmtDec(item.srtHours):'—'}</td>
+      <td class="anum">${item.invoicedLaborCost?aFmt(item.invoicedLaborCost):'—'}</td>
+      <td class="anum">${item.srtLaborCost?aFmt(item.srtLaborCost):'—'}</td>
+      <td>${lBadge}</td>
+      <td class="anum">${item.partsCost?aFmt(item.partsCost):'—'} ${pBadge}</td>
+    </tr>`;
+    if(item.partsNote) rows += `<tr><td colspan="7" style="font-size:11px;color:var(--brown-light);padding:3px 10px 8px;font-family:var(--mono)">↳ ${aEsc(item.partsNote)}</td></tr>`;
+  });
+
+  let pairedHTML = '';
+  if(r.commonlyPairedRepairs?.length) pairedHTML = `<div class="a-sep"></div><div class="a-sec">Repairs commonly done at the same time</div><ul style="font-size:12px;color:var(--brown-mid);line-height:2;padding-left:16px;">${r.commonlyPairedRepairs.map(p=>`<li>${aEsc(p)}</li>`).join('')}</ul>`;
+  let flagsHTML = '';
+  if(r.flags?.length) flagsHTML = `<div class="a-sep"></div><div class="a-sec">Additional flags</div>${r.flags.map(f=>`<div style="font-size:12px;color:var(--brown-mid);padding:6px 0;border-bottom:1px solid var(--cream-mid)">⚑ ${aEsc(f)}</div>`).join('')}`;
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-header">
+        <h3>Analysis Result${unitModel?' — '+aEsc(unitModel):''}</h3>
+        <span class="a-badge ${overallClass==='good'?'b-ok':overallClass==='warn'?'b-slightly':'b-over'}" style="font-size:12px;padding:4px 12px">${overallLabel}</span>
+      </div>
+      <div class="result-body">
+        <div class="summary-box">${aEsc(r.summary)}</div>
+        <div class="kpi-row">
+          <div class="a-kpi"><div class="a-kpi-label">Invoiced Labor</div><div class="a-kpi-val">${aFmt(r.totalInvoicedLaborCost||0)}</div><div class="a-kpi-sub">As billed</div></div>
+          <div class="a-kpi"><div class="a-kpi-label">SRT Labor</div><div class="a-kpi-val good">${aFmt(r.totalSRTLaborCost||0)}</div><div class="a-kpi-sub">Expected at $${laborRate}/hr</div></div>
+          <div class="a-kpi"><div class="a-kpi-label">Labor Variance</div><div class="a-kpi-val ${diff>0?'bad':'good'}">${diff>=0?'+':''}${aFmt(diff)}</div><div class="a-kpi-sub">${diffPct>=0?'+':''}${aFmtDec(diffPct)}% vs SRT</div></div>
+          <div class="a-kpi"><div class="a-kpi-label">Parts Cost</div><div class="a-kpi-val">${aFmt(r.totalPartsCost||0)}</div><div class="a-kpi-sub">From invoice</div></div>
+        </div>
+        <div class="a-sec">Line items</div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Repair</th><th class="anum">Inv hrs</th><th class="anum">SRT hrs</th><th class="anum">Inv labor</th><th class="anum">SRT labor</th><th>Status</th><th class="anum">Parts</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        ${pairedHTML}${flagsHTML}
+      </div>
+    </div>`;
+}
+
+function aGetLog() { try { return JSON.parse(localStorage.getItem('cfa_repair_log')||'[]'); } catch { return []; } }
+function aSaveLog(log) { try { localStorage.setItem('cfa_repair_log', JSON.stringify(log)); } catch(e) {} }
+function aSaveToLog(result, inputText, unitModel, laborRate) {
+  const log = aGetLog();
+  log.unshift({ id:Date.now(), date:new Date().toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}), inputText:inputText.slice(0,200), unitModel, laborRate, result });
+  aSaveLog(log.slice(0,100));
+}
+
+function aRenderLog() {
+  const log = aGetLog();
+  const listEl = document.getElementById('aLogList');
+  const statsEl = document.getElementById('aLogStats');
+  if(!log.length) {
+    listEl.innerHTML = '<div class="a-empty">No analyses logged yet. Run your first invoice above.</div>';
+    statsEl.style.display = 'none'; return;
+  }
+  const totals = log.reduce((acc,e) => { acc.invoiced+=(e.result.totalInvoicedLaborCost||0); acc.srt+=(e.result.totalSRTLaborCost||0); acc.count++; return acc; },{invoiced:0,srt:0,count:0});
+  const totalSaved = totals.srt - totals.invoiced;
+  document.getElementById('aLogStatsInner').innerHTML = `
+    <div class="stat-item"><div class="stat-num">${totals.count}</div><div class="stat-lbl">Invoices analyzed</div></div>
+    <div class="stat-item"><div class="stat-num">${aFmt(totals.invoiced)}</div><div class="stat-lbl">Total invoiced labor</div></div>
+    <div class="stat-item"><div class="stat-num" style="color:${totalSaved<0?'var(--red)':'var(--green)'}">${totalSaved>=0?'+':''}${aFmt(totalSaved)}</div><div class="stat-lbl">${totalSaved>=0?'Savings vs SRT':'Over SRT total'}</div></div>`;
+  statsEl.style.display = 'block';
+  listEl.innerHTML = log.map(e => {
+    const diff = (e.result.totalInvoicedLaborCost||0)-(e.result.totalSRTLaborCost||0);
+    const badge = e.result.overallStatus==='ok'?'<span class="a-badge b-ok">Within SRT</span>':e.result.overallStatus==='slightly_over'?'<span class="a-badge b-slightly">Slightly over</span>':'<span class="a-badge b-over">Exceeds SRT</span>';
+    return `<div class="log-entry"><div class="log-entry-main"><div class="log-entry-date">${aEsc(e.date)}${e.unitModel?' · '+aEsc(e.unitModel):''}</div><div class="log-entry-desc">${aEsc(e.inputText.slice(0,80))}${e.inputText.length>80?'…':''}</div><div class="log-entry-meta">${e.result.lineItems?.length||0} line items · Invoiced ${aFmt(e.result.totalInvoicedLaborCost||0)} labor · SRT ${aFmt(e.result.totalSRTLaborCost||0)} · Variance ${diff>=0?'+':''}${aFmt(diff)}</div></div>${badge}</div>`;
+  }).join('');
+}
+
+function aClearLog() { if(!confirm('Clear all saved analyses?')) return; try{localStorage.removeItem('cfa_repair_log');}catch(e){} aRenderLog(); }
+
+function aRenderSRT() {
+  const q = (document.getElementById('aSrtSearch')?.value||'').toLowerCase();
+  const rate = aGetLaborRate();
+  let html = '';
+  Object.entries(SRT_DATA).forEach(([section, data]) => {
+    const filtered = data.codes.filter(row => !q || row.code.toLowerCase().includes(q) || row.desc.toLowerCase().includes(q));
+    if(!filtered.length) return;
+    const unitHeaders = data.units.map(u=>`<th class="anum">${aEsc(u)}<br><span style="font-weight:400">(hrs)</span></th>`).join('');
+    html += `<div class="srt-section">
+      <div class="srt-section-header">${aEsc(section)}<span class="srt-units">${data.units.join(' · ')}</span></div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Code</th><th>Description</th>${unitHeaders}<th class="anum">Avg hrs</th><th class="anum">Est. cost @ $${rate}/hr</th></tr></thead>
+        <tbody>${filtered.map(row => {
+          const valid = row.times.filter(t=>t!==null&&t!==undefined);
+          const avg = valid.length?valid.reduce((a,b)=>a+b,0)/valid.length:0;
+          const timeCells = row.times.map(t=>`<td class="anum">${t!==null&&t!==undefined?aFmtDec(t):'<span style="color:var(--brown-faint)">—</span>'}</td>`).join('');
+          return `<tr><td><span style="font-family:var(--mono);font-size:11px;font-weight:500">${aEsc(row.code)}</span></td><td>${aEsc(row.desc)}</td>${timeCells}<td class="anum" style="font-weight:500">${avg>0?aFmtDec(avg):'—'}</td><td class="anum" style="color:var(--green);font-weight:500">${avg>0?aFmt(avg*rate):'—'}</td></tr>`;
+        }).join('')}</tbody>
+      </table></div>
+    </div>`;
+  });
+  document.getElementById('aSrtTable').innerHTML = html || '<div class="a-empty">No SRT codes match your search.</div>';
+}
+
+// init audit tool
+aRenderSRT();
+aUpdateRateDisplay();
+</script>
+
+<!-- FOOTER -->
+<footer>
+  <p><a href="index.html">← Back to Cold Fleet Analytics</a> &nbsp;·&nbsp; <a href="index.html#contact">hello@coldfleetanalytics.com</a> &nbsp;·&nbsp; © 2024 Cold Fleet Analytics</p>
+</footer>
 </body>
 </html>
