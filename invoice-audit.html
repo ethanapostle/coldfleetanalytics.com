@@ -9,8 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0d1418; --panel:#141d23; --panel-2:#1a242b; --line:#26333b;
-    --line-soft:#1f2a31;
+    --bg:#0d1418; --panel:#141d23; --panel-2:#1a242b; --line:#26333b; --line-soft:#1f2a31;
     --txt:#e7eef2; --txt-2:#94a8b2; --txt-3:#5f7480;
     --cyan:#37d2c4; --cyan-dim:#1f9b90;
     --green:#56d189; --amber:#e9a93f; --red:#e85a50;
@@ -20,126 +19,66 @@
   body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14px;line-height:1.5;
     background-image:radial-gradient(circle at 15% -10%, rgba(55,210,196,.07), transparent 45%);
     min-height:100vh;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1120px;margin:0 auto;padding:28px 22px 80px}
-
-  /* header */
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 22px 90px}
   header{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:26px;flex-wrap:wrap;gap:14px}
   .brand{display:flex;align-items:center;gap:11px}
   .logo{width:34px;height:34px;border-radius:8px;background:linear-gradient(140deg,var(--cyan),var(--cyan-dim));display:grid;place-items:center;font-family:var(--disp);font-weight:800;color:#06181a;font-size:18px}
   .brand h1{font-family:var(--disp);font-weight:800;letter-spacing:-.02em;font-size:21px}
   .brand .sub{font-family:var(--mono);font-size:11px;color:var(--txt-3);letter-spacing:.04em;text-transform:uppercase}
-  .tagline{text-align:right;max-width:320px}
-  .tagline b{font-family:var(--disp);font-size:15px;font-weight:700;color:var(--cyan)}
-  .tagline span{display:block;font-size:12px;color:var(--txt-2)}
+  .tagl{text-align:right;color:var(--cyan);font-family:var(--disp);font-weight:700;font-size:15px}
+  .tagl span{display:block;color:var(--txt-3);font-family:var(--sans);font-weight:400;font-size:12px;max-width:340px}
 
-  /* layout */
-  .grid{display:grid;grid-template-columns:1fr;gap:18px}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
-  .panel h2{font-family:var(--disp);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txt-2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-  .panel h2 .num{font-family:var(--mono);font-size:11px;color:#06181a;background:var(--cyan);border-radius:5px;padding:1px 7px;font-weight:600}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .step .n{width:22px;height:22px;border-radius:6px;background:var(--cyan);color:#06181a;display:grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:12px}
+  .step h2{font-family:var(--disp);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt-2)}
 
-  /* input zone */
-  .drop{border:1.5px dashed var(--line);border-radius:12px;padding:26px;text-align:center;cursor:pointer;transition:.18s;background:var(--panel-2)}
-  .drop:hover,.drop.over{border-color:var(--cyan);background:rgba(55,210,196,.05)}
-  .drop .ic{font-size:26px;margin-bottom:6px;opacity:.8}
-  .drop b{color:var(--txt)}
-  .drop small{display:block;color:var(--txt-3);margin-top:4px;font-size:12px}
-  textarea{width:100%;margin-top:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-family:var(--mono);font-size:12.5px;padding:13px;min-height:118px;resize:vertical}
-  textarea:focus{outline:none;border-color:var(--cyan-dim)}
-  .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;align-items:flex-end}
-  .field{flex:1;min-width:150px}
-  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--txt-3);margin-bottom:5px;font-weight:500}
-  select,input.txt{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:10px 11px;font-family:var(--sans);font-size:13.5px}
-  select:focus,input.txt:focus{outline:none;border-color:var(--cyan-dim)}
-  .btn{background:var(--cyan);color:#06181a;border:none;border-radius:9px;padding:11px 22px;font-family:var(--disp);font-weight:700;font-size:13.5px;cursor:pointer;letter-spacing:.02em;transition:.15s}
+  .drop{border:1.5px dashed var(--line);border-radius:11px;padding:34px 20px;text-align:center;cursor:pointer;transition:.18s;background:var(--panel-2)}
+  .drop:hover,.drop.over{border-color:var(--cyan);background:#16242a}
+  .drop .ic{font-size:26px;opacity:.5}
+  .drop b{display:block;margin-top:8px;color:var(--txt)}
+  .drop small{color:var(--txt-3)}
+  .drop.loaded{border-color:var(--cyan);border-style:solid}
+
+  textarea{width:100%;margin-top:12px;min-height:96px;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:var(--mono);font-size:12.5px;padding:12px;resize:vertical}
+  textarea::placeholder{color:var(--txt-3)}
+
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:16px;align-items:end}
+  .field label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt-3);margin-bottom:6px}
+  .field input,.field select{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-family:var(--mono);font-size:13px;padding:10px}
+  .btn{background:var(--cyan);color:#06181a;border:none;border-radius:9px;padding:11px 20px;font-family:var(--disp);font-weight:700;font-size:13px;cursor:pointer;transition:.15s;white-space:nowrap}
   .btn:hover{filter:brightness(1.08)}
-  .btn.ghost{background:transparent;color:var(--txt-2);border:1px solid var(--line)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
 
-  /* results */
-  #results{display:none;animation:fade .4s ease}
-  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .hidden{display:none}
+  .note{background:#10211f;border:1px solid #1c3a36;border-radius:9px;padding:11px 14px;font-size:12.5px;color:var(--txt-2);margin-top:12px;display:flex;gap:9px}
+  .note.warn{background:#221a10;border-color:#3a2e1c}
+  .note.bad{background:#22110f;border-color:#3a1c1c}
+  .note .i{flex-shrink:0}
 
-  /* table */
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-3);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
-  td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
-  tr:last-child td{border-bottom:none}
-  .code{font-family:var(--mono);font-size:11.5px;color:var(--cyan);background:rgba(55,210,196,.1);padding:2px 7px;border-radius:5px}
-  .code.nomatch{color:var(--amber);background:rgba(233,169,63,.12)}
-  td.n{text-align:right;font-family:var(--mono)}
-  input.hr{width:62px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:5px 7px;font-family:var(--mono);font-size:12px;text-align:right}
-  input.hr:focus{outline:none;border-color:var(--cyan)}
-  input.hr.flag{border-color:var(--amber)}
-  tfoot td{border-top:1px solid var(--line);padding-top:11px;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin-top:4px;font-size:13px}
+  th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt-3);font-weight:500;padding:9px 8px;border-bottom:1px solid var(--line)}
+  td{padding:11px 8px;border-bottom:1px solid var(--line-soft)}
+  td.r,th.r{text-align:right}
+  .code{font-family:var(--mono);font-size:11px;background:#13302d;color:var(--cyan);padding:2px 7px;border-radius:5px}
+  .mono{font-family:var(--mono)}
+  tr.tot td{font-weight:700;border-top:1px solid var(--line);border-bottom:none;color:var(--txt)}
+  .miss{color:var(--txt-3);font-style:italic}
 
-  /* gauges */
-  .gauges{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .gauge-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 20px 16px}
-  .gauge-card h3{font-family:var(--disp);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
-  .gauge-card .hint{font-size:11.5px;color:var(--txt-3);margin-bottom:6px}
-  .gsvg{width:100%;display:block;touch-action:none}
-  .gsvg .needle{cursor:grab}
-  .gsvg.drag .needle{cursor:grabbing}
-  .verdict{display:flex;align-items:baseline;justify-content:space-between;margin-top:6px}
-  .verdict .val{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1}
-  .verdict .vu{font-size:12px;color:var(--txt-2);font-weight:500;margin-left:6px}
-  .verdict .tag{font-family:var(--disp);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.05em;padding:4px 11px;border-radius:20px}
-  .gnote{font-size:11.5px;color:var(--txt-2);margin-top:10px;border-top:1px solid var(--line-soft);padding-top:9px}
-  .gnote b{color:var(--txt);font-family:var(--mono)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  .gauge-wrap{text-align:center}
+  .gauge-wrap h3{font-family:var(--disp);font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt-2);margin-bottom:4px}
+  .gauge-wrap p{font-size:12px;color:var(--txt-3);margin-bottom:8px}
+  .reading{font-family:var(--mono);font-size:13px;margin-top:6px}
+  .verdict{font-family:var(--disp);font-weight:800;font-size:18px;margin-top:2px}
 
-  /* summary cards */
-  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px}
-  .scard{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:13px 14px}
-  .scard .lab{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--txt-3);margin-bottom:5px}
-  .scard .v{font-family:var(--mono);font-size:19px;font-weight:600}
-  .scard.big .v{font-size:22px}
-  .v.pos{color:var(--green)} .v.neg{color:var(--red)}
-
-  .verdict-banner{display:flex;align-items:center;gap:13px;background:var(--panel-2);border:1px solid var(--line);border-left-width:4px;border-radius:11px;padding:15px 17px;margin-bottom:4px}
-  .verdict-banner .em{font-size:24px}
-  .verdict-banner b{font-family:var(--disp);font-size:16px;font-weight:700}
-  .verdict-banner p{font-size:13px;color:var(--txt-2);margin-top:2px}
-
-  .placeholder-note{font-size:11.5px;color:var(--amber);background:rgba(233,169,63,.08);border:1px solid rgba(233,169,63,.25);border-radius:8px;padding:9px 12px;margin-top:12px}
-  .placeholder-note b{color:var(--txt);font-family:var(--mono)}
-
-  /* warranty kpi */
-  .wbadge{text-align:center;padding:11px 18px;border-radius:12px;min-width:148px;border:1px solid var(--line)}
-  .wbadge .st{font-family:var(--disp);font-weight:800;font-size:16px;text-transform:uppercase;letter-spacing:.02em}
-  .wbadge .sub{font-size:11px;color:var(--txt-2);margin-top:3px;font-family:var(--mono)}
-  .wmsg{font-size:13px;border-radius:9px;padding:11px 13px;display:flex;gap:9px;align-items:flex-start}
-  .wmsg .i{font-size:16px;line-height:1.3}
-  .wmsg.flag{background:rgba(232,90,80,.1);border:1px solid rgba(232,90,80,.3)}
-  .wmsg.conc{background:rgba(233,169,63,.1);border:1px solid rgba(233,169,63,.3)}
-  .wmsg.ok{background:rgba(86,209,137,.07);border:1px solid rgba(86,209,137,.22)}
-  .wmsg b{color:var(--txt)}
-
-  /* savings */
-  .savings-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:13px}
-  .savings-head .tot{font-family:var(--mono);font-size:19px;color:var(--green);font-weight:600}
-  .sopp{display:flex;align-items:center;gap:14px;background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:11px;padding:13px 15px}
-  .sopp+.sopp{margin-top:10px}
-  .sopp .body{flex:1;min-width:0}
-  .sopp .body b{font-size:13.5px}
-  .sopp .body p{font-size:12px;color:var(--txt-2);margin-top:2px}
-  .sopp .save{font-family:var(--mono);font-weight:600;color:var(--green);font-size:15px;white-space:nowrap}
-  .sopp a{color:var(--cyan);text-decoration:none;font-size:12px;font-weight:600;border:1px solid var(--cyan-dim);padding:7px 12px;border-radius:8px;white-space:nowrap}
-  .sopp a:hover{background:rgba(55,210,196,.1)}
-  @media(max-width:640px){.sopp{flex-wrap:wrap}}
-
-  /* chat */
-  .chat-log{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto;margin-bottom:13px;padding-right:4px}
-  .chat-log:empty{display:none}
-  .cmsg{padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.55;max-width:88%;white-space:pre-wrap}
-  .cmsg.user{align-self:flex-end;background:var(--cyan);color:#06181a;font-weight:500}
-  .cmsg.bot{align-self:flex-start;background:var(--panel-2);border:1px solid var(--line)}
-  .cmsg.bot.think{color:var(--txt-3);font-style:italic}
-  .chat-input{display:flex;gap:10px}
-  .chat-input .txt{flex:1}
-  .chat-seed{font-size:12px;color:var(--txt-3);margin-bottom:11px}
-  .chat-seed b{color:var(--cyan);cursor:pointer;font-weight:500}
-  .chat-seed b:hover{text-decoration:underline}
-  @media(max-width:720px){.gauges{grid-template-columns:1fr}.summary{grid-template-columns:1fr 1fr}}
+  .warranty-box{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .wstat{text-align:right;border:1px solid var(--line);border-radius:10px;padding:12px 18px;min-width:170px}
+  .wstat .big{font-family:var(--disp);font-weight:800;font-size:15px}
+  .wstat small{font-family:var(--mono);font-size:11px;color:var(--txt-3);display:block;margin-top:2px}
+  .spinner{width:16px;height:16px;border:2px solid rgba(55,210,196,.3);border-top-color:var(--cyan);border-radius:50%;display:inline-block;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:7px}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -149,564 +88,311 @@
       <div class="logo">CF</div>
       <div>
         <h1>Invoice Audit</h1>
-        <div class="sub">ColdFleet Analytics · SRT 62-10069 Rev B</div>
+        <div class="sub">ColdFleet Analytics · live reader</div>
       </div>
     </div>
-    <div class="tagline">
-      <b>Audit your service provider.</b>
-      <span>Match every line to the factory SRT, then grade the labor and parts you were charged.</span>
+    <div class="tagl">Audit your service provider
+      <span>Reads your actual invoice, grades labor against factory SRT and parts against OEM list.</span>
     </div>
   </header>
 
-  <div class="grid">
-    <!-- STEP 1: INPUT -->
-    <div class="panel">
-      <h2><span class="num">1</span> Drop the invoice or describe the job</h2>
-      <div class="drop" id="drop">
-        <div class="ic">📄</div>
-        <b>Drag an invoice here</b> or click to browse
-        <small>PDF, image, or paste the line items below</small>
-        <input type="file" id="file" hidden>
+  <!-- STEP 1 -->
+  <div class="card">
+    <div class="step"><div class="n">1</div><h2>Drop the invoice or describe the job</h2></div>
+    <div class="drop" id="drop">
+      <div class="ic">▤</div>
+      <b id="dropTitle">Drop a photo or PDF of your invoice — or click to browse</b>
+      <small>The reader sends it to the vision model and pulls every line. Or paste the work below.</small>
+      <input type="file" id="file" accept="image/*,application/pdf" class="hidden">
+    </div>
+    <textarea id="paste" placeholder="…or type / paste the work performed and parts, e.g.&#10;Unit: Carrier X2 2100 APX&#10;Replace curbside + roadside front doors (impact) ...... parts $...&#10;Replace leaking condenser coil ........................ parts $...&#10;LABOR: 12.0 hrs"></textarea>
+
+    <div class="controls">
+      <div class="field">
+        <label>Unit family</label>
+        <select id="unit">
+          <option>Carrier X2 2100 / 2500 APX</option>
+          <option>Carrier X4 7300 / 7500</option>
+          <option>Carrier Vector 8500 / 8600</option>
+          <option>Carrier Extra / Ultra (NDL)</option>
+          <option>Other / unsure</option>
+        </select>
       </div>
-      <textarea id="jobtext" placeholder="Or type / paste the work performed, e.g.&#10;&#10;Unit: Carrier Vector 8600&#10;1. Compressor R&R ............ 6.5 hrs labor  /  $2,480 parts&#10;2. Evacuate & charge system .. 1.5 hrs labor&#10;3. Filter drier R&R .......... 0.5 hrs labor /  $92 parts&#10;4. Condenser motor R&R ....... 1.2 hrs labor /  $315 parts"></textarea>
-      <div class="row">
-        <div class="field">
-          <label>Unit family</label>
-          <select id="unit">
-            <option value="vector">Carrier Vector / Vector MT</option>
-            <option value="x4">Carrier X4 7300 / 7500</option>
-            <option value="x2">Carrier X2 2100 / 2500 APX</option>
-          </select>
+      <div class="field"><label>Labor rate (/hr)</label><input id="rate" value="100"></div>
+      <div class="field"><label>Invoice currency</label>
+        <select id="cur"><option>CAD</option><option>USD</option></select>
+      </div>
+      <div class="field"><label>USD→CAD</label><input id="fx" value="1.37"></div>
+      <div class="field"><button class="btn" id="go">Analyze invoice →</button></div>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" class="hidden">
+
+    <div class="card">
+      <div class="step"><div class="n">W</div><h2>Warranty &amp; coverage check</h2></div>
+      <div class="warranty-box">
+        <div style="flex:1;min-width:240px">
+          <div id="unitline" class="mono" style="font-size:12.5px;color:var(--txt-2);margin-bottom:8px"></div>
+          <div id="warrantyNote"></div>
         </div>
-        <div class="field">
-          <label>Labor rate (/hr)</label>
-          <input class="txt" id="rate" type="number" value="165">
-        </div>
-        <div class="field" style="flex:0 0 auto">
-          <label>Invoice currency</label>
-          <select id="cur" style="width:118px"><option value="USD">USD</option><option value="CAD">CAD</option></select>
-        </div>
-        <div class="field" id="fxfield" style="flex:0 0 auto;display:none">
-          <label>USD→CAD</label>
-          <input class="txt" id="fx" type="number" step="0.01" value="1.37" style="width:92px">
-        </div>
-        <div class="field" style="flex:0 0 auto">
-          <button class="btn" id="analyze">Analyze invoice →</button>
+        <div class="wstat">
+          <div class="big" id="wbig">—</div>
+          <small id="wsub"></small>
         </div>
       </div>
     </div>
 
-    <!-- RESULTS -->
-    <div id="results">
-
-      <!-- verdict banner -->
-      <div class="verdict-banner" id="banner" style="margin-bottom:18px">
-        <span class="em">✅</span>
-        <div><b id="banner-h">Fairly priced</b><p id="banner-p"></p></div>
-      </div>
-
-      <!-- WARRANTY KPI -->
-      <div class="panel" style="margin-bottom:18px">
-        <h2><span class="num">W</span> Warranty &amp; concession check</h2>
-        <div style="display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px">
-          <div class="field" style="flex:0 0 auto">
-            <label>Unit hours (at repair)</label>
-            <input class="txt" id="uhours" type="number" value="6250" style="width:130px">
-          </div>
-          <div class="field" style="flex:0 0 auto">
-            <label>In-service date</label>
-            <input class="txt" id="isdate" type="date" value="2024-10-01" style="width:160px">
-          </div>
-          <div class="wbadge" id="wbadge" style="margin-left:auto">
-            <div class="st" id="wst">—</div><div class="sub" id="wsub"></div>
-          </div>
-        </div>
-        <div id="wmsgs"></div>
-      </div>
-
-      <!-- STEP 2: SRT breakdown -->
-      <div class="panel" style="margin-bottom:18px">
-        <h2><span class="num">2</span> SRT breakdown &amp; labor cost</h2>
-        <table id="srt-table">
-          <thead><tr>
-            <th>Line item</th><th>Job code</th>
-            <th class="n">SRT hrs</th><th class="n">Billed hrs</th><th class="n">SRT labor</th>
-          </tr></thead>
-          <tbody id="srt-body"></tbody>
-          <tfoot><tr>
-            <td>Totals</td><td></td>
-            <td class="n" id="t-srt">0.0</td>
-            <td class="n" id="t-billed">0.0</td>
-            <td class="n" id="t-srtcost">$0</td>
-          </tr></tfoot>
-        </table>
-        <p style="font-size:11.5px;color:var(--txt-3);margin-top:10px">
-          Billed hours are read from the invoice when present. Blank or highlighted fields are editable — enter the hours from your invoice to grade them.
-        </p>
-      </div>
-
-      <!-- STEP 3: gauges -->
-      <div class="gauges" style="margin-bottom:18px">
-        <!-- LABOR gauge -->
-        <div class="gauge-card">
-          <h3>Labor correction factor</h3>
-          <div class="hint">Billed hours ÷ SRT hours. Drag the needle to set your fair benchmark.</div>
-          <svg class="gsvg" id="g-labor" viewBox="0 0 260 168"></svg>
-          <div class="verdict">
-            <span><span class="val" id="labor-val">1.46</span><span class="vu">× Standard Repair Time</span></span>
-            <span class="tag" id="labor-tag">Standard</span>
-          </div>
-          <div class="gnote">
-            This invoice's actual factor: <b id="labor-actual">1.42</b> &nbsp;·&nbsp;
-            Fair labor at <b id="labor-factor-echo">1.40×</b>: <b id="labor-fair">$0</b>
-          </div>
-        </div>
-        <!-- PARTS gauge -->
-        <div class="gauge-card">
-          <h3>Parts pricing</h3>
-          <div class="hint">Charged price ÷ manufacturer list. Computed from the parts on the invoice.</div>
-          <svg class="gsvg" id="g-parts" viewBox="0 0 260 168"></svg>
-          <div class="verdict">
-            <span><span class="val" id="parts-val">1.18</span><span class="vu">× OEM List Price</span></span>
-            <span class="tag" id="parts-tag">Great</span>
-          </div>
-          <div class="gnote">
-            Charged: <b id="parts-charged">$0</b> &nbsp;·&nbsp; List: <b id="parts-list">$0</b>
-            &nbsp;·&nbsp; Over list: <b id="parts-over">$0</b>
-          </div>
-        </div>
-      </div>
-
-      <!-- COST SAVINGS (AVRO) -->
-      <div class="panel" id="savings-panel" style="margin-bottom:18px;display:none">
-        <div class="savings-head">
-          <h2 style="margin:0"><span class="num">$</span> Cost-saving opportunities</h2>
-          <span class="tot" id="savings-tot">$0</span>
-        </div>
-        <div id="savings-list"></div>
-        <p style="font-size:11.5px;color:var(--txt-3);margin-top:10px">Aftermarket equivalents sourced from avroparts.com. The live tool checks AVRO stock and pricing in real time.</p>
-      </div>
-
-      <!-- STEP 4: summary -->
-      <div class="panel">
-        <h2><span class="num">3</span> Invoice summary</h2>
-        <div class="summary">
-          <div class="scard"><div class="lab">Labor billed</div><div class="v" id="s-labor">$0</div></div>
-          <div class="scard"><div class="lab">Parts billed</div><div class="v" id="s-parts">$0</div></div>
-          <div class="scard big"><div class="lab">Invoice total</div><div class="v" id="s-total">$0</div></div>
-          <div class="scard big"><div class="lab">vs. fair estimate</div><div class="v" id="s-var">$0</div></div>
-        </div>
-        <div class="placeholder-note" id="parts-placeholder">
-          Parts are graded against the real Carrier &amp; Thermo King 2026 list (USD). This mockup uses a sample of part rows; the live tool indexes the full ~35,000-row combined list and matches by part number. Use the currency toggle if the invoice is in CAD.
-        </div>
-      </div>
-
-      <!-- CHAT -->
-      <div class="panel" style="margin-top:18px">
-        <h2><span class="num">?</span> Ask about this invoice</h2>
-        <div class="chat-seed">Try: <b class="seed">Should I dispute anything?</b> · <b class="seed">Is the compressor labor reasonable?</b> · <b class="seed">What should I ask the dealer?</b></div>
-        <div id="chat-log" class="chat-log"></div>
-        <div class="chat-input">
-          <input id="chat-text" class="txt" placeholder="Ask a question about this repair invoice…">
-          <button class="btn" id="chat-send">Send</button>
-        </div>
-      </div>
-
+    <div class="card">
+      <div class="step"><div class="n">2</div><h2>SRT breakdown &amp; labor</h2></div>
+      <table id="srtTable"><thead><tr>
+        <th>Repair / line item</th><th>Job code</th><th class="r">SRT hrs</th>
+        <th class="r">Billed hrs</th><th class="r">SRT labor</th>
+      </tr></thead><tbody></tbody></table>
+      <div class="note" style="margin-top:14px"><span class="i">ℹ</span>
+        <span id="laborNote"></span></div>
     </div>
+
+    <div class="card grid2">
+      <div class="gauge-wrap">
+        <h3>Labor correction factor</h3>
+        <p>Billed hours ÷ factory SRT hours</p>
+        <div id="laborGauge"></div>
+        <div class="reading" id="laborReading"></div>
+        <div class="verdict" id="laborVerdict"></div>
+      </div>
+      <div class="gauge-wrap">
+        <h3>Parts pricing</h3>
+        <p>Charged ÷ OEM list (matched parts)</p>
+        <div id="partsGauge"></div>
+        <div class="reading" id="partsReading"></div>
+        <div class="verdict" id="partsVerdict"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="step"><div class="n">3</div><h2>Parts pricing detail</h2></div>
+      <table id="partsTable"><thead><tr>
+        <th>Part</th><th>Part #</th><th class="r">Qty</th>
+        <th class="r">Charged</th><th class="r">OEM list</th><th class="r">vs list</th>
+      </tr></thead><tbody></tbody></table>
+      <div class="note warn" style="margin-top:14px"><span class="i">⚠</span>
+        <span>OEM list is the 2026 Carrier price file (treated as USD). If your invoice is older, "under list" partly reflects price inflation since then. Lines with no list match are excluded from the gauge.</span></div>
+    </div>
+
   </div>
 </div>
 
 <script>
-/* ---------- SRT lookup (subset of real 62-10069 Rev B data) ---------- */
-const SRT = {
-  vector:{
-    "compressor r&r":{code:"C1-A",hrs:4.0},
-    "compressor":{code:"C1-A",hrs:4.0},
-    "evacuate":{code:"R44-A",hrs:1.0},
-    "charge":{code:"R44-A",hrs:1.0},
-    "filter drier":{code:"R11-A",hrs:0.25},
-    "drier":{code:"R11-A",hrs:0.25},
-    "condenser motor":{code:"D4-A",hrs:0.75},
-    "evaporator motor":{code:"D4-B",hrs:1.5},
-    "evaporator coil":{code:"R21-A",hrs:9.6},
-    "condenser coil":{code:"R1-A",hrs:4.0},
-    "fan blade":{code:"D3-A",hrs:1.3},
-    "bulkhead":{code:"A7-A",hrs:0.4},
-    "high pressure switch":{code:"R10-A",hrs:0.8},
-    "txv":{code:"R23-C",hrs:1.8},
-  },
-  x4:{
-    "compressor":{code:"C1-A",hrs:4.0},
-    "evacuate":{code:"R44-A",hrs:1.0},
-    "charge":{code:"R44-A",hrs:1.0},
-    "filter drier":{code:"R11-A",hrs:0.25},
-    "drier":{code:"R11-A",hrs:0.25},
-    "condenser coil":{code:"R1-A",hrs:4.0},
-    "evaporator coil":{code:"R21-A",hrs:9.6},
-    "receiver tank":{code:"R7-A",hrs:1.7},
-    "evxv":{code:"R23-F",hrs:1.8},
-  },
-  x2:{
-    "compressor":{code:"C1-A",hrs:4.0},
-    "evacuate":{code:"R44-A",hrs:1.0},
-    "filter drier":{code:"R11-A",hrs:0.25},
-    "condenser coil":{code:"R1-A",hrs:4.0},
-    "evaporator coil":{code:"R21-A",hrs:9.6},
-    "txv":{code:"R23-C",hrs:1.8},
-  }
+/* ---------- real OEM list prices (2026 Carrier file), keyed by digits-only part # ---------- */
+const PARTS_LIST = {
+  "580473801":{d:"Niagara grille assy",      list:1436.21},
+  "580474310":{d:"Door curbside front",      list:463.16},
+  "580474218":{d:"Door RS front no paddle",  list:478.54},
+  "440044302":{d:"Door latch RS S.STL",      list:67.43},
+  "340605106":{d:"Rivnut 1/4",               list:0.7916},
+  "580482700":{d:"Panel bottom",             list:236.10},
+  "140031001":{d:"Valve assy, king",         list:69.07},
+  "140022204":{d:"Cap, valve stem",          list:6.31},
+  "760200000":{d:"LED light bar kit",        list:354.28},
+  "650018203":{d:"Receiver assy",            list:531.94},
+  "080030500":{d:"Coil condenser/radiator",  list:2356.07}
 };
-/* Manufacturer LIST prices in USD (Carrier "Each Price" / TK "Crown" column).
-   Sample rows from the real 2026 combined list; live tool indexes the full ~35k-row file by part #. */
-const PARTS_LIST = {           // fallback by job code (USD)
-  "C1-A":2988.10, "R44-A":0, "R11-A":48.85, "D4-A":298, "D4-B":340,
-  "R21-A":2152.51, "R1-A":1359.47, "D3-A":190, "R10-A":85, "R23-C":210, "R7-A":260, "R23-F":420
-};
-/* BASIC factory warranty per family (from the TransX warranty matrices). months / hours; null = unlimited */
-const WARRANTY = {
-  vector:{months:36, hours:6000, label:"Vector 8600/8611 basic"},
-  x4:{months:12, hours:null, label:"X4 7300/7500 basic"},
-  x2:{months:12, hours:null, label:"X2 APX basic (inferred)"},
-};
-/* currency — list & AVRO prices are USD; the invoice may be USD or CAD */
-let CUR="USD", FX=1.37;        // CAD per USD
-/* AVRO aftermarket catalog (real products from avroparts.com). Prices are CAD. */
-const AVRO = [
-  {kw:"condenser coil", name:"Carrier Transicold 08-00330-00 Condenser Coil (X4)", price:1599.00,
-   url:"https://www.avroparts.com/products/in-testing-verification-coming-soon-carrier-transicold-08-00330-00-condenser-coil-carrier-transicold-x4"},
-  {kw:"light bar", name:"AVRO 76-02000-00 Aftermarket Light Bar", price:299.99,
-   url:"https://www.avroparts.com/products/avro-parts-76-02000-00-aftermarket-light-bar"},
-  {kw:"status light", name:"Thermo King Status Light 40-0984 (Precedent)", price:379.99,
-   url:"https://www.avroparts.com/products/thermo-king-status-light-40-0984-for-precedent-units"},
-  {kw:"heater door", name:"Carrier Solara Heater Doors 76-00508-03", price:889.99,
-   url:"https://www.avroparts.com/products/carrier-transicold-solara-heater-doors-76-00508-03-white"},
-  {kw:"chute", name:"Carrier Produce Reefer Chute (Unimax)", price:199.99,
-   url:"https://www.avroparts.com/products/carrier-product-chute"},
-];
-/* job codes covered as major components (placeholder until real warranty terms) */
-const WARRANTABLE = new Set(["C1-A","C10-A","C10-B","R1-A","R21-A","R22-A"]);
+const normPN = s => (s||"").toString().replace(/[^0-9]/g,"");
 
-/* ---------- demo invoice prefilled (real Carrier part #s + USD list) ---------- */
-const DEMO = [
-  {item:"Compressor R&R", pn:"18-10143-21", code:"C1-A", srt:4.0, billed:6.5, parts:3250, list:2988.10},
-  {item:"Evacuate & charge system", code:"R44-A", srt:1.0, billed:1.5, parts:0, list:0},
-  {item:"Filter drier R&R", pn:"14-00470-00", code:"R11-A", srt:0.25, billed:0.5, parts:92, list:48.85},
-  {item:"Condenser coil R&R", pn:"08-00330-00", code:"R1-A", srt:4.0, billed:5.0, parts:1850, list:1359.47},
-];
+/* ---------- SRT reference passed to the model for job matching (Carrier trailer) ---------- */
+const SRT_REFERENCE = `
+U41-A  R.S. (roadside) front door assembly R&R   0.5
+U42-A  C.S. (curbside) front door assembly R&R   0.5
+U43-A  Front door latch assembly R&R             0.5
+U45-A  Door hinge R&R                            0.2
+U4-A   Grille R&R                                0.8
+U4-C   Grille insert R&R                         0.2
+U58-A1 One door bumper R&R                        0.2
+R44-A  Evacuate & charge system                  1.0
+R11-A  Filter drier R&R                          0.25
+C1-A   Compressor R&R                            4.0
+R1-A   Condenser coil R&R                        4.0
+E48-A1 Rear engine seal R&R                       4.5
+D1-A   Belt(s) R&R                               0.4
+`;
 
-let lines = [];           // current parsed lines
-let laborFactor = 1.40;   // draggable benchmark
+const PROMPT = `You are an OCR + parsing engine for refrigeration trailer-unit repair invoices.
+Read the invoice and return ONLY a JSON object — no prose, no markdown fences.
 
-const $ = s=>document.querySelector(s);
-const cym = ()=> CUR==="CAD" ? "CA$" : "$";
-const money = n=>cym()+Math.round(n).toLocaleString();
-const usdToInv = u => u*(CUR==="CAD"?FX:1);     // OEM list/parts files are USD
-const cadToInv = c => CUR==="CAD"? c : c/FX;    // AVRO prices are CAD
+Use this Carrier trailer SRT reference to assign a job code + SRT hours to each distinct repair job described.
+If a job is not in the reference, estimate typical Carrier trailer SRT hours and set "estimated":true.
 
-/* ---------- naive parser: match keywords -> SRT codes ---------- */
-function parse(text, unit){
-  const tbl = SRT[unit];
-  const out = [];
-  text.split(/\n/).forEach(raw=>{
-    const ln = raw.trim(); if(!ln) return;
-    const low = ln.toLowerCase();
-    let match=null, key=null;
-    for(const k in tbl){ if(low.includes(k)){ if(!match||k.length>key.length){match=tbl[k];key=k;} } }
-    if(!match) return;
-    const hr = (low.match(/([\d.]+)\s*hr/)||[])[1];
-    const pr = (ln.match(/\$\s*([\d,]+)/g)||[]).map(s=>+s.replace(/[$,]/g,''));
-    // assume largest $ figure on a line is parts
-    out.push({item:ln.replace(/\.{2,}/g,' ').slice(0,60), code:match.code, srt:match.hrs,
-      billed: hr?+hr:null, parts: pr.length?Math.max(...pr):0});
-  });
-  return out;
+SRT REFERENCE:
+${SRT_REFERENCE}
+
+Return this exact schema:
+{
+ "unit": {"family":"", "model":"", "vin":"", "inServiceDate":"YYYY-MM-DD or ''", "hours": null},
+ "currency": "CAD or USD",
+ "jobs": [ {"repair":"short label", "code":"SRT code or ''", "srtHours": number, "estimated": boolean} ],
+ "parts": [ {"desc":"", "partNumber":"as printed", "qty": number, "unitPrice": number, "lineTotal": number} ],
+ "laborBilledHours": number,
+ "laborCost": number,
+ "partsTotal": number,
+ "suppliesTotal": number,
+ "taxTotal": number,
+ "invoiceTotal": number
 }
+Capture every parts line with its part number and charged price. Capture the labor as total billed hours and dollars (even if it is a single combined line). If a value is not on the invoice, use 0 or ''.`;
 
-/* ---------- render table ---------- */
-function renderTable(){
-  const rate = +$("#rate").value||0;
-  const body = $("#srt-body"); body.innerHTML="";
-  let tsrt=0, tbill=0, tcost=0;
-  lines.forEach((l,i)=>{
-    tsrt+=l.srt; tcost+=l.srt*rate; if(l.billed) tbill+=l.billed;
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${l.item}</td>
-      <td><span class="code ${l.code?'':'nomatch'}">${l.code||'no match'}</span></td>
-      <td class="n">${l.srt.toFixed(2)}</td>
-      <td class="n"><input class="hr ${l.billed==null?'flag':''}" type="number" step="0.1"
-           value="${l.billed==null?'':l.billed}" data-i="${i}" placeholder="?"></td>
-      <td class="n">${money(l.srt*rate)}</td>`;
-    body.appendChild(tr);
-  });
-  $("#t-srt").textContent=tsrt.toFixed(2);
-  $("#t-billed").textContent=tbill.toFixed(2);
-  $("#t-srtcost").textContent=money(tcost);
-  body.querySelectorAll("input.hr").forEach(inp=>inp.addEventListener("input",e=>{
-    lines[+e.target.dataset.i].billed = e.target.value===''?null:+e.target.value;
-    e.target.classList.toggle('flag', e.target.value==='');
-    recompute();
-  }));
-}
+/* ---------- helpers ---------- */
+let FILE=null;
+const $=id=>document.getElementById(id);
+const drop=$("drop"), fileIn=$("file");
+drop.onclick=()=>fileIn.click();
+["dragover","dragenter"].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",ev=>{ if(ev.dataTransfer.files[0]) setFile(ev.dataTransfer.files[0]); });
+fileIn.onchange=()=>{ if(fileIn.files[0]) setFile(fileIn.files[0]); };
+function setFile(f){ FILE=f; drop.classList.add("loaded"); $("dropTitle").textContent="✓ "+f.name+" — ready to analyze"; $("paste").value=""; }
 
-/* ---------- gauge drawing ---------- */
-function polar(cx,cy,r,deg){const a=(deg-180)*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
-function arc(cx,cy,r,a0,a1){const[x0,y0]=polar(cx,cy,r,a0),[x1,y1]=polar(cx,cy,r,a1);
-  const large=(a1-a0)>180?1:0;return`M${x0} ${y0} A${r} ${r} 0 ${large} 1 ${x1} ${y1}`;}
+const toB64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(f);});
 
-function drawGauge(svg, min, max, val, zones, draggable){
-  const cx=130,cy=140,r=96;
-  const t = (v)=>((v-min)/(max-min))*180;          // value -> degrees 0..180
-  let h="";
-  // colored zone bands
-  zones.forEach(z=>{ h+=`<path d="${arc(cx,cy,r,t(z.a),t(z.b))}" stroke="${z.c}" stroke-width="13" fill="none" stroke-linecap="butt"/>`;});
-  // ticks
-  zones.forEach(z=>{[z.a,z.b].forEach(()=>{});});
-  // tick labels (min, important marks, max)
-  const marks = svg.id==="g-labor" ? [1.0,1.1,1.4,1.7,2.0] : [0.8,1.0,1.2,1.4];
-  marks.forEach(m=>{ if(m<min||m>max)return; const[x,y]=polar(cx,cy,r-22,t(m));
-    h+=`<text x="${x}" y="${y+3}" fill="var(--txt-3)" font-size="9" font-family="var(--mono)" text-anchor="middle">${m.toFixed(svg.id==='g-labor'&&m%1?2:m%1?1:1).replace(/\.0$/,'.0')}</text>`;});
-  // needle
-  const deg=t(Math.max(min,Math.min(max,val)));
-  const[nx,ny]=polar(cx,cy,r-4,deg);
-  h+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--txt)" stroke-width="3" stroke-linecap="round"/>`;
-  h+=`<circle cx="${cx}" cy="${cy}" r="7" fill="var(--panel-2)" stroke="var(--txt)" stroke-width="2"/>`;
-  if(draggable){const[hx,hy]=polar(cx,cy,r-4,deg);
-    h+=`<circle class="needle" cx="${hx}" cy="${hy}" r="11" fill="var(--cyan)" opacity="0.95"/>`;
-    h+=`<circle class="needle" cx="${hx}" cy="${hy}" r="22" fill="transparent"/>`;}
-  svg.innerHTML=h;
-}
+function money(n,cur){ return (cur==="CAD"?"CA$":"$")+Math.round(n).toLocaleString(); }
 
-/* zone configs */
-const LABOR_ZONES=[
-  {a:1.0,b:1.1,c:"#56d189"},  // great
-  {a:1.1,b:1.7,c:"#e9a93f"},  // standard
-  {a:1.7,b:2.0,c:"#e85a50"},  // high
-];
-const PARTS_ZONES=[
-  {a:0.8,b:1.0,c:"#56d189"},  // below list = good
-  {a:1.0,b:1.2,c:"#37d2c4"},  // 1.0-1.2 = great
-  {a:1.2,b:1.5,c:"#e85a50"},  // high
-];
+$("go").onclick=analyze;
+async function analyze(){
+  const status=$("status");
+  if(!FILE && !$("paste").value.trim()){ status.innerHTML='<div class="note bad"><span class="i">⚠</span><span>Drop an invoice or paste the work performed first.</span></div>'; return; }
+  $("go").disabled=true;
+  status.innerHTML='<div class="note"><span class="i"><span class="spinner"></span></span><span>Reading the invoice line by line…</span></div>';
 
-function laborVerdict(f){
-  if(f<=1.1) return ["Great","var(--green)"];
-  if(f<1.7)  return ["Standard","var(--amber)"];
-  return ["High","var(--red)"];
-}
-function partsVerdict(r){
-  if(r<1.0)  return ["Good","var(--green)"];
-  if(r<=1.2) return ["Great","var(--cyan)"];
-  return ["High","var(--red)"];
-}
-
-/* ---------- recompute everything ---------- */
-function recompute(){
-  const rate=+$("#rate").value||0;
-  renderTable();
-  // labor
-  let srtH=0, billH=0, billLabor=0;
-  lines.forEach(l=>{ srtH+=l.srt; if(l.billed){billH+=l.billed; billLabor+=l.billed*rate;} });
-  const actual = srtH? billH/srtH : 1;
-  $("#labor-actual").textContent=actual.toFixed(2);
-  // parts — list prices are USD, converted to the invoice currency for comparison
-  let charged=0, list=0;
-  lines.forEach(l=>{ charged+=l.parts; const lu=(l.list!=null?l.list:(PARTS_LIST[l.code]||0)); list+=usdToInv(lu); });
-  const partsRatio = list? charged/list : 1;
-
-  // gauges
-  drawGauge($("#g-labor"),1.0,2.0,actual,LABOR_ZONES,true);
-  drawGauge($("#g-parts"),0.8,1.5,partsRatio,PARTS_ZONES,false);
-
-  // labor readout uses the draggable benchmark for "fair" calc, actual for verdict needle
-  const[lt,lc]=laborVerdict(actual);
-  $("#labor-val").textContent=actual.toFixed(2);
-  $("#labor-tag").textContent=lt; $("#labor-tag").style.color=lc; $("#labor-tag").style.background=lc+"22";
-  $("#labor-factor-echo").textContent=laborFactor.toFixed(2)+"×";
-  $("#labor-fair").textContent=money(srtH*laborFactor*rate);
-
-  const[pt,pc]=partsVerdict(partsRatio);
-  $("#parts-val").textContent=partsRatio.toFixed(2);
-  $("#parts-tag").textContent=pt; $("#parts-tag").style.color=pc; $("#parts-tag").style.background=pc+"22";
-  $("#parts-charged").textContent=money(charged);
-  $("#parts-list").textContent=money(list);
-  $("#parts-over").textContent=money(charged-list);
-
-  // summary
-  const fairLabor = srtH*laborFactor*rate;
-  const fairTotal = fairLabor + list*1.1; // fair parts ~ list+10%
-  const invoiceTotal = billLabor + charged;
-  $("#s-labor").textContent=money(billLabor);
-  $("#s-parts").textContent=money(charged);
-  $("#s-total").textContent=money(invoiceTotal);
-  const variance = invoiceTotal - fairTotal;
-  const vEl=$("#s-var");
-  vEl.textContent=(variance>=0?"+":"−")+money(Math.abs(variance));
-  vEl.className="v "+(variance>50?"neg":"pos");
-
-  // ---- warranty & concession (BASIC factory warranty: months OR hours, whichever binds first) ----
-  const unit=$("#unit").value, W=WARRANTY[unit];
-  const uh=+$("#uhours").value||0;
-  const isd=$("#isdate").value ? new Date($("#isdate").value) : null;
-  const months = isd ? (Date.now()-isd.getTime())/(1000*60*60*24*30.44) : 0;
-  const wmsgs=$("#wmsgs"), wbadge=$("#wbadge"), wst=$("#wst"), wsub=$("#wsub");
-  // binding dimension = the one furthest along toward its limit
-  const dims=[];
-  if(W.months) dims.push({k:"month",val:months,lim:W.months,r:months/W.months,unit:"-month"});
-  if(W.hours)  dims.push({k:"hour", val:uh,    lim:W.hours, r:uh/W.hours,   unit:"-hr"});
-  dims.sort((a,b)=>b.r-a.r);
-  const bind = dims[0] || {r:0,k:"",lim:0,unit:""};
-  const limTxt = b=> `${b.lim.toLocaleString()}${b.unit} limit`;
-  let coveredVal=0; const coveredNames=[];
-  lines.forEach(l=>{ if(WARRANTABLE.has(l.code)){ coveredVal+=(l.billed?l.billed*rate:0)+l.parts; coveredNames.push(l.item.split(/ R&R| -/)[0].trim()); }});
-  const cn = coveredNames.join(", ");
-  const hrsTxt = W.hours ? `${uh.toLocaleString()}/${W.hours.toLocaleString()} hrs` : `${Math.round(months)}/${W.months} mo`;
-  if(bind.r<=1.0){
-    wst.textContent="Under warranty"; wst.style.color="var(--green)"; wbadge.style.background="rgba(86,209,137,.12)";
-    wsub.textContent=hrsTxt;
-    wmsgs.innerHTML = coveredVal>0
-      ? `<div class="wmsg flag"><span class="i">⛔</span><div><b>Billed — but should be warranty.</b> ${cn} ${coveredNames.length>1?"are":"is"} still inside the ${W.label} (${limTxt(bind)}). <b>${money(coveredVal)}</b> should not have been charged — dispute these lines.</div></div>`
-      : `<div class="wmsg ok"><span class="i">✅</span><div>Unit is inside the ${W.label}; no covered major components were billed on this invoice.</div></div>`;
-  } else if(bind.r<=1.15){
-    const over = bind.val - bind.lim, pct=(bind.r-1)*100;
-    wst.textContent="Concession zone"; wst.style.color="var(--amber)"; wbadge.style.background="rgba(233,169,63,.12)";
-    wsub.textContent=`${pct.toFixed(1)}% past limit`;
-    wmsgs.innerHTML = `<div class="wmsg conc"><span class="i">⚠️</span><div><b>Ask for a concession.</b> The unit is ${Math.round(over).toLocaleString()}${bind.unit} (${pct.toFixed(1)}%) past the ${limTxt(bind)} — inside the 15% concession range.${coveredVal>0?` Covered repairs (${cn}) total <b>${money(coveredVal)}</b>. `:" "}Contact the dealer/manufacturer to request goodwill coverage before paying in full.</div></div>`;
-  } else {
-    wst.textContent="Out of warranty"; wst.style.color="var(--txt-2)"; wbadge.style.background="var(--panel-2)";
-    wsub.textContent=`${(bind.r*100-100).toFixed(0)}% past limit`;
-    wmsgs.innerHTML = `<div class="wmsg ok"><span class="i">ℹ️</span><div>Unit is past the ${W.label} (${limTxt(bind)}) by more than 15% — beyond the concession range under basic coverage.</div></div>`;
-  }
-  // standing advisement: basic warranty only; extended packages may apply (advice, no action)
-  wmsgs.innerHTML += `<div class="wmsg ok" style="margin-top:8px"><span class="i">💡</span><div>This grades against <b>basic factory coverage</b> only — the most common. Major components carry longer terms (engine/compressor up to 48 mo/8,000 hrs; microprocessor up to 60 mo/10,000 hrs), and some TransX 2021 X4 units carry EMCC coverage (72 mo / 12,000 hrs). <b>Check the unit's serial plate or purchase records</b> — you may have bought a longer package before assuming a repair is out of warranty.</div></div>`;
-
-  // ---- AVRO cost-saving opportunities (AVRO prices are CAD -> invoice currency) ----
-  let sTot=0, sHtml="";
-  lines.forEach(l=>{
-    const low=l.item.toLowerCase();
-    const m=AVRO.find(a=>low.includes(a.kw));
-    const avroInv = m ? cadToInv(m.price) : 0;
-    if(m && l.parts>avroInv){
-      const sv=l.parts-avroInv; sTot+=sv;
-      sHtml+=`<div class="sopp"><div class="body"><b>${l.item}</b><p>Charged ${money(l.parts)} · AVRO: ${m.name} — ${money(avroInv)}</p></div><div class="save">save ${money(sv)}</div><a href="${m.url}" target="_blank" rel="noopener">View on AVRO →</a></div>`;
+  let content=[];
+  if(FILE){
+    const b64=await toB64(FILE);
+    if(FILE.type==="application/pdf"){
+      content.push({type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}});
+    }else{
+      const mt = FILE.type && FILE.type.startsWith("image/") ? FILE.type : "image/jpeg";
+      content.push({type:"image",source:{type:"base64",media_type:mt,data:b64}});
     }
-  });
-  if(sHtml){ $("#savings-list").innerHTML=sHtml; $("#savings-tot").textContent="up to "+money(sTot); $("#savings-panel").style.display="block"; }
-  else $("#savings-panel").style.display="none";
-
-  // banner
-  const b=$("#banner"), bh=$("#banner-h"), bp=$("#banner-p");
-  if(actual>=1.7 || partsRatio>1.2){
-    b.style.borderLeftColor="var(--red)"; b.querySelector(".em").textContent="⛔";
-    bh.textContent="Overcharged"; bh.style.color="var(--red)";
-    bp.textContent=`Labor is running ${actual.toFixed(2)}× SRT and/or parts are ${partsRatio.toFixed(2)}× list — both above fair-market range.`;
-  } else if(actual>1.5 || partsRatio>1.1){
-    b.style.borderLeftColor="var(--amber)"; b.querySelector(".em").textContent="⚠️";
-    bh.textContent="Slightly high"; bh.style.color="var(--amber)";
-    bp.textContent=`Within tolerance but on the high side. Labor ${actual.toFixed(2)}× SRT, parts ${partsRatio.toFixed(2)}× list.`;
+    content.push({type:"text",text:PROMPT});
   } else {
-    b.style.borderLeftColor="var(--green)"; b.querySelector(".em").textContent="✅";
-    bh.textContent="Fairly priced"; bh.style.color="var(--green)";
-    bp.textContent=`Labor ${actual.toFixed(2)}× SRT and parts ${partsRatio.toFixed(2)}× list — both inside the fair-market range.`;
+    content.push({type:"text",text:PROMPT+"\n\nINVOICE TEXT:\n"+$("paste").value});
   }
-}
 
-/* ---------- labor gauge drag ---------- */
-function enableDrag(){
-  const svg=$("#g-labor"); let dragging=false;
-  function setFromEvent(e){
-    const rect=svg.getBoundingClientRect();
-    const px=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-    const py=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
-    // map to viewBox coords
-    const vx=px/rect.width*260, vy=py/rect.height*168;
-    let ang=Math.atan2(vy-140, vx-130)*180/Math.PI; // -180..0 over top half
-    let deg=ang+180; deg=Math.max(0,Math.min(180,deg));
-    laborFactor = 1.0 + deg/180*1.0;                 // map 0..180 -> 1.0..2.0
-    laborFactor = Math.round(laborFactor*100)/100;
-    recompute();
-  }
-  const down=e=>{dragging=true;svg.classList.add("drag");setFromEvent(e);e.preventDefault();};
-  const move=e=>{if(dragging)setFromEvent(e);};
-  const up=()=>{dragging=false;svg.classList.remove("drag");};
-  svg.addEventListener("mousedown",down); svg.addEventListener("touchstart",down,{passive:false});
-  window.addEventListener("mousemove",move); window.addEventListener("touchmove",move,{passive:false});
-  window.addEventListener("mouseup",up); window.addEventListener("touchend",up);
-}
-/* NOTE: drag sets the benchmark factor (labor-fair calc); the needle shows ACTUAL.
-   For the mockup the draggable handle is drawn on the actual-needle position so you can feel it.
-   We'll refine which value the needle tracks based on your feedback. */
-
-/* ---------- wire up ---------- */
-$("#analyze").addEventListener("click",()=>{
-  const txt=$("#jobtext").value.trim();
-  const unit=$("#unit").value;
-  lines = txt ? parse(txt,unit) : DEMO.slice();
-  if(lines.length===0){ lines=DEMO.slice(); }
-  $("#results").style.display="block";
-  recompute();
-  $("#results").scrollIntoView({behavior:"smooth",block:"start"});
-});
-$("#rate").addEventListener("input",()=>{ if($("#results").style.display==="block") recompute(); });
-["uhours","isdate","unit"].forEach(id=>$("#"+id).addEventListener("input",()=>{ if($("#results").style.display==="block") recompute(); }));
-$("#cur").addEventListener("change",e=>{ CUR=e.target.value; $("#fxfield").style.display = CUR==="CAD"?"block":"none"; if($("#results").style.display==="block") recompute(); });
-$("#fx").addEventListener("input",e=>{ FX=+e.target.value||1; if($("#results").style.display==="block") recompute(); });
-
-/* file drop visuals (mock) */
-const drop=$("#drop"), file=$("#file");
-drop.addEventListener("click",()=>file.click());
-["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
-["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
-drop.addEventListener("drop",()=>{ drop.querySelector("b").textContent="Invoice received — reading line items…";
-  setTimeout(()=>{lines=DEMO.slice();$("#results").style.display="block";recompute();
-    $("#results").scrollIntoView({behavior:"smooth"});},500); });
-file.addEventListener("change",()=>{ if(file.files.length){drop.querySelector("b").textContent=file.files[0].name;
-  lines=DEMO.slice();$("#results").style.display="block";recompute();} });
-
-enableDrag();
-
-/* ---------- chat (asks Claude about the current invoice) ---------- */
-const chatHist=[];
-function addMsg(role,text){const d=document.createElement("div");d.className="cmsg "+role;d.textContent=text;
-  $("#chat-log").appendChild(d);$("#chat-log").scrollTop=1e6;return d;}
-function buildContext(){
-  const rate=+$("#rate").value||0;
-  let s=`Current invoice analysis — unit family ${$("#unit").value}, currency ${CUR}, labor rate ${money(rate)}/hr.\nLine items:\n`;
-  lines.forEach(l=>{ s+=`• ${l.item} [${l.code}] — SRT ${l.srt}h, billed ${l.billed==null?'?':l.billed}h, parts ${money(l.parts)}\n`; });
-  s+=`Labor is ${$("#labor-val").textContent}× Standard Repair Time (${$("#labor-tag").textContent}). `;
-  s+=`Parts are ${$("#parts-val").textContent}× OEM List Price (${$("#parts-tag").textContent}). `;
-  s+=`Warranty status: ${$("#wst").textContent} (${$("#wsub").textContent}).`;
-  return s;
-}
-async function sendChat(){
-  const t=$("#chat-text").value.trim(); if(!t) return;
-  $("#chat-text").value=""; addMsg("user",t);
-  const think=addMsg("bot","thinking…"); think.classList.add("think");
-  const userMsg = buildContext()+"\n\nOperator question: "+t;
   try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514", max_tokens:1000,
-        system:"You are a transport-refrigeration service advisor helping a fleet operator audit a repair invoice for Carrier Transicold / Thermo King reefer units. Be concise, plain-spoken, and practical. Ground every answer in the invoice context provided. Don't invent SRT codes, part numbers, or prices that aren't in the context. When something looks high, say so and suggest what to ask the service provider.",
-        messages:[...chatHist,{role:"user",content:userMsg}]
-      })
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content}]})
     });
-    const data=await res.json();
-    const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
-    think.remove(); addMsg("bot",txt||"(no response)");
-    chatHist.push({role:"user",content:userMsg},{role:"assistant",content:txt});
-  }catch(e){
-    think.remove();
-    addMsg("bot","Couldn't reach Claude from here. Inside Claude.ai this works automatically; on the live site it needs an API key via a small backend proxy (we'll wire that when you deploy).");
+    const data=await resp.json();
+    const text=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
+    const clean=text.replace(/```json|```/g,"").trim();
+    const parsed=JSON.parse(clean);
+    render(parsed);
+    status.innerHTML="";
+  }catch(err){
+    console.error(err);
+    status.innerHTML='<div class="note bad"><span class="i">⚠</span><span>Couldn\'t read that automatically. On the live site this step needs the API proxy; inside Claude.ai it should work — try a clearer photo or paste the line items. ('+err.message+')</span></div>';
   }
+  $("go").disabled=false;
 }
-$("#chat-send").addEventListener("click",sendChat);
-$("#chat-text").addEventListener("keydown",e=>{ if(e.key==="Enter") sendChat(); });
-document.querySelectorAll(".seed").forEach(b=>b.addEventListener("click",()=>{ $("#chat-text").value=b.textContent; sendChat(); }));
 
-/* preload demo so the gauges are visible immediately */
-lines=DEMO.slice(); $("#results").style.display="block"; recompute();
+function render(d){
+  const cur=$("cur").value, fx=parseFloat($("fx").value)||1.37, rate=parseFloat($("rate").value)||100;
+  const usdToInv = u => cur==="CAD" ? u*fx : u;   // OEM list file = USD
+
+  $("results").classList.remove("hidden");
+
+  /* unit + warranty */
+  $("unitline").textContent = `${d.unit.family||$("unit").value} · ${d.unit.model||""} ${d.unit.vin?("· VIN "+d.unit.vin):""} ${d.unit.inServiceDate?("· in service "+d.unit.inServiceDate):""} ${d.unit.hours?("· "+d.unit.hours+" hrs"):""}`.replace(/\s+/g," ");
+  const txt=(($("paste").value)+" "+JSON.stringify(d.jobs||[])).toLowerCase();
+  const collision=/impact|collision|accident|missing|torn off|damage/.test(txt);
+  if(collision){
+    $("warrantyNote").innerHTML='<div class="note bad"><span class="i">⚑</span><span>This reads as <b>collision / impact damage</b>. Manufacturer warranty explicitly excludes accident damage — coverage status is moot here; this would be an insurance or out-of-pocket repair, not a warranty claim.</span></div>';
+    $("wbig").textContent="NOT WARRANTY"; $("wbig").style.color="var(--amber)"; $("wsub").textContent="accident exclusion";
+  } else {
+    $("warrantyNote").innerHTML='<div class="note"><span class="i">💡</span><span>Grades against basic factory coverage. Check the serial plate — major components (engine/compressor, microprocessor) and some TransX 2021 X4 units carry longer terms.</span></div>';
+    $("wbig").textContent="CHECK PLATE"; $("wbig").style.color="var(--cyan)"; $("wsub").textContent="verify in-service + hours";
+  }
+
+  /* SRT table */
+  const tb=$("srtTable").querySelector("tbody"); tb.innerHTML="";
+  let srtTot=0;
+  (d.jobs||[]).forEach(j=>{
+    srtTot+=(+j.srtHours||0);
+    tb.innerHTML+=`<tr><td>${j.repair}${j.estimated?' <span class="miss">(est)</span>':''}</td>
+      <td>${j.code?'<span class="code">'+j.code+'</span>':'<span class="miss">—</span>'}</td>
+      <td class="r mono">${(+j.srtHours||0).toFixed(2)}</td>
+      <td class="r mono">—</td>
+      <td class="r mono">${money((+j.srtHours||0)*rate,cur)}</td></tr>`;
+  });
+  const billed=+d.laborBilledHours||0;
+  tb.innerHTML+=`<tr class="tot"><td>Totals</td><td></td>
+    <td class="r mono">${srtTot.toFixed(2)}</td>
+    <td class="r mono">${billed.toFixed(2)}</td>
+    <td class="r mono">${money(srtTot*rate,cur)}</td></tr>`;
+  $("laborNote").innerHTML=`This invoice bills labor as <b>${billed.toFixed(1)} combined hours</b> (no per-job split), graded against <b>${srtTot.toFixed(2)} total SRT hours</b>. Billed labor charged ${money(d.laborCost||billed*rate,cur)}.`;
+
+  /* labor gauge */
+  const lf = srtTot>0 ? billed/srtTot : 0;
+  drawGauge("laborGauge", lf, [1.1,1.4,1.7], 2.4);
+  $("laborReading").innerHTML=`<b>${lf.toFixed(2)}×</b> Standard Repair Time`;
+  $("laborVerdict").innerHTML=verdict(lf,1.1,1.7);
+
+  /* parts table + gauge */
+  const pb=$("partsTable").querySelector("tbody"); pb.innerHTML="";
+  let charged=0, list=0, matched=0;
+  (d.parts||[]).forEach(p=>{
+    const m=PARTS_LIST[normPN(p.partNumber)];
+    const ct=+p.lineTotal||((+p.unitPrice||0)*(+p.qty||1));
+    charged+=ct;
+    let listCell='<span class="miss">no match</span>', ratioCell='<span class="miss">—</span>';
+    if(m){
+      const lt=usdToInv(m.list)*(+p.qty||1);
+      list+=lt; matched++;
+      const r=ct/lt;
+      listCell=money(lt,cur);
+      ratioCell=`<span class="mono" style="color:${r<=1?'var(--green)':r<=1.2?'var(--amber)':'var(--red)'}">${r.toFixed(2)}×</span>`;
+    }
+    pb.innerHTML+=`<tr><td>${p.desc}</td><td class="mono" style="font-size:11px">${p.partNumber||''}</td>
+      <td class="r mono">${+p.qty||1}</td><td class="r mono">${money(ct,cur)}</td>
+      <td class="r mono">${listCell}</td><td class="r">${ratioCell}</td></tr>`;
+  });
+  pb.innerHTML+=`<tr class="tot"><td>Totals (${matched} of ${(d.parts||[]).length} matched)</td><td></td><td></td>
+    <td class="r mono">${money(charged,cur)}</td><td class="r mono">${money(list,cur)}</td>
+    <td class="r mono">${list>0?(charged/list).toFixed(2)+'×':'—'}</td></tr>`;
+
+  const pr = list>0 ? charged/list : 0;
+  drawGauge("partsGauge", pr, [1.0,1.1,1.2], 1.8);
+  $("partsReading").innerHTML=`<b>${pr.toFixed(2)}×</b> OEM list price`;
+  $("partsVerdict").innerHTML=verdict(pr,1.0,1.2);
+
+  $("results").scrollIntoView({behavior:"smooth"});
+}
+
+function verdict(v,goodMax,highMin){
+  if(v<=goodMax) return '<span style="color:var(--green)">Great</span>';
+  if(v<highMin)  return '<span style="color:var(--amber)">Fair</span>';
+  return '<span style="color:var(--red)">High</span>';
+}
+
+/* semicircle gauge: value, thresholds [great, median, high], scale max */
+function drawGauge(id,val,th,max){
+  const w=240,h=140,cx=120,cy=125,r=92;
+  const ang=v=>Math.PI*(1-Math.min(v,max)/max);
+  const pt=(a,rr=r)=>[cx+rr*Math.cos(a), cy-rr*Math.sin(a)];
+  const arc=(a0,a1,col)=>{const[x0,y0]=pt(a0),[x1,y1]=pt(a1);return `<path d="M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}" stroke="${col}" stroke-width="13" fill="none" stroke-linecap="round"/>`;};
+  const segs=[[0,th[0],"var(--green)"],[th[0],th[2],"var(--amber)"],[th[2],max,"var(--red)"]];
+  let html=`<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-width:260px">`;
+  segs.forEach(s=>html+=arc(ang(s[0]),ang(s[1]),s[2]));
+  const a=ang(val);const[nx,ny]=pt(a,r-4);
+  html+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--txt)" stroke-width="2.5"/>`;
+  html+=`<circle cx="${cx}" cy="${cy}" r="5" fill="var(--txt)"/>`;
+  html+=`<text x="14" y="138" fill="var(--txt-3)" font-family="var(--mono)" font-size="9">0</text>`;
+  html+=`<text x="${w-22}" y="138" fill="var(--txt-3)" font-family="var(--mono)" font-size="9">${max}×</text>`;
+  html+=`</svg>`;
+  $(id).innerHTML=html;
+}
 </script>
 </body>
 </html>
-
