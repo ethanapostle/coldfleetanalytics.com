@@ -33,14 +33,18 @@
   .step .n{width:22px;height:22px;border-radius:6px;background:var(--cyan);color:#06181a;display:grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:12px}
   .step h2{font-family:var(--disp);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt-2)}
 
-  .drop{border:1.5px dashed var(--line);border-radius:11px;padding:34px 20px;text-align:center;cursor:pointer;transition:.18s;background:var(--panel-2)}
+  .drop{border:1.5px dashed var(--line);border-radius:11px;padding:30px 20px;text-align:center;cursor:pointer;transition:.18s;background:var(--panel-2)}
   .drop:hover,.drop.over{border-color:var(--cyan);background:#16242a}
-  .drop .ic{font-size:26px;opacity:.5}
+  .drop .ic{font-size:24px;opacity:.5}
   .drop b{display:block;margin-top:8px;color:var(--txt)}
   .drop small{color:var(--txt-3)}
-  .drop.loaded{border-color:var(--cyan);border-style:solid}
+  .filelist{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+  .filerow{display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:12px}
+  .filerow .pg{color:var(--cyan)}
+  .filerow button{background:none;border:none;color:var(--txt-3);cursor:pointer;font-size:15px}
+  .filerow button:hover{color:var(--red)}
 
-  textarea{width:100%;margin-top:12px;min-height:96px;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:var(--mono);font-size:12.5px;padding:12px;resize:vertical}
+  textarea{width:100%;margin-top:12px;min-height:90px;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:var(--mono);font-size:12.5px;padding:12px;resize:vertical}
   textarea::placeholder{color:var(--txt-3)}
 
   .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:16px;align-items:end}
@@ -54,16 +58,21 @@
   .note{background:#10211f;border:1px solid #1c3a36;border-radius:9px;padding:11px 14px;font-size:12.5px;color:var(--txt-2);margin-top:12px;display:flex;gap:9px}
   .note.warn{background:#221a10;border-color:#3a2e1c}
   .note.bad{background:#22110f;border-color:#3a1c1c}
+  .note.ok{background:#10211a;border-color:#1c3a2c}
   .note .i{flex-shrink:0}
 
   table{width:100%;border-collapse:collapse;margin-top:4px;font-size:13px}
   th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt-3);font-weight:500;padding:9px 8px;border-bottom:1px solid var(--line)}
-  td{padding:11px 8px;border-bottom:1px solid var(--line-soft)}
+  td{padding:9px 8px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
   td.r,th.r{text-align:right}
   .code{font-family:var(--mono);font-size:11px;background:#13302d;color:var(--cyan);padding:2px 7px;border-radius:5px}
   .mono{font-family:var(--mono)}
   tr.tot td{font-weight:700;border-top:1px solid var(--line);border-bottom:none;color:var(--txt)}
   .miss{color:var(--txt-3);font-style:italic}
+  .cell-in{width:90px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--txt);font-family:var(--mono);font-size:12px;padding:5px 7px;text-align:right}
+  .cell-in.s{width:54px}
+  .cell-in:focus{outline:none;border-color:var(--cyan)}
+  .flag{color:var(--red);cursor:help;margin-left:5px}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media(max-width:720px){.grid2{grid-template-columns:1fr}}
@@ -86,10 +95,7 @@
   <header>
     <div class="brand">
       <div class="logo">CF</div>
-      <div>
-        <h1>Invoice Audit</h1>
-        <div class="sub">ColdFleet Analytics · live reader</div>
-      </div>
+      <div><h1>Invoice Audit</h1><div class="sub">ColdFleet Analytics · live reader</div></div>
     </div>
     <div class="tagl">Audit your service provider
       <span>Reads your actual invoice, grades labor against factory SRT and parts against OEM list.</span>
@@ -101,10 +107,11 @@
     <div class="step"><div class="n">1</div><h2>Drop the invoice or describe the job</h2></div>
     <div class="drop" id="drop">
       <div class="ic">▤</div>
-      <b id="dropTitle">Drop a photo or PDF of your invoice — or click to browse</b>
-      <small>The reader sends it to the vision model and pulls every line. Or paste the work below.</small>
-      <input type="file" id="file" accept="image/*,application/pdf" class="hidden">
+      <b id="dropTitle">Drop a PDF, or photos of every page — click to browse</b>
+      <small>Multi-page invoices welcome. PDF reads most accurately; add one image per page if using photos.</small>
+      <input type="file" id="file" accept="image/*,application/pdf" multiple class="hidden">
     </div>
+    <div class="filelist" id="filelist"></div>
     <textarea id="paste" placeholder="…or type / paste the work performed and parts, e.g.&#10;Unit: Carrier X2 2100 APX&#10;Replace curbside + roadside front doors (impact) ...... parts $...&#10;Replace leaking condenser coil ........................ parts $...&#10;LABOR: 12.0 hrs"></textarea>
 
     <div class="controls">
@@ -138,48 +145,42 @@
           <div id="unitline" class="mono" style="font-size:12.5px;color:var(--txt-2);margin-bottom:8px"></div>
           <div id="warrantyNote"></div>
         </div>
-        <div class="wstat">
-          <div class="big" id="wbig">—</div>
-          <small id="wsub"></small>
-        </div>
+        <div class="wstat"><div class="big" id="wbig">—</div><small id="wsub"></small></div>
       </div>
     </div>
 
     <div class="card">
       <div class="step"><div class="n">2</div><h2>SRT breakdown &amp; labor</h2></div>
       <table id="srtTable"><thead><tr>
-        <th>Repair / line item</th><th>Job code</th><th class="r">SRT hrs</th>
-        <th class="r">Billed hrs</th><th class="r">SRT labor</th>
+        <th>Repair (from work narrative)</th><th>Job code</th><th class="r">SRT hrs</th><th class="r">SRT labor</th>
       </tr></thead><tbody></tbody></table>
-      <div class="note" style="margin-top:14px"><span class="i">ℹ</span>
-        <span id="laborNote"></span></div>
+      <div class="controls" style="margin-top:14px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+        <div class="field"><label>Billed labor hours</label><input id="billed" class="mono"></div>
+        <div class="field"><label>Billed labor $</label><input id="laborCost" class="mono"></div>
+      </div>
+      <div class="note" style="margin-top:8px"><span class="i">ℹ</span><span id="laborNote"></span></div>
     </div>
 
     <div class="card grid2">
       <div class="gauge-wrap">
-        <h3>Labor correction factor</h3>
-        <p>Billed hours ÷ factory SRT hours</p>
-        <div id="laborGauge"></div>
-        <div class="reading" id="laborReading"></div>
-        <div class="verdict" id="laborVerdict"></div>
+        <h3>Labor correction factor</h3><p>Billed hours ÷ factory SRT hours</p>
+        <div id="laborGauge"></div><div class="reading" id="laborReading"></div><div class="verdict" id="laborVerdict"></div>
       </div>
       <div class="gauge-wrap">
-        <h3>Parts pricing</h3>
-        <p>Charged ÷ OEM list (matched parts)</p>
-        <div id="partsGauge"></div>
-        <div class="reading" id="partsReading"></div>
-        <div class="verdict" id="partsVerdict"></div>
+        <h3>Parts pricing</h3><p>Charged ÷ OEM list (matched parts)</p>
+        <div id="partsGauge"></div><div class="reading" id="partsReading"></div><div class="verdict" id="partsVerdict"></div>
       </div>
     </div>
 
     <div class="card">
       <div class="step"><div class="n">3</div><h2>Parts pricing detail</h2></div>
+      <div id="reconcile"></div>
       <table id="partsTable"><thead><tr>
-        <th>Part</th><th>Part #</th><th class="r">Qty</th>
-        <th class="r">Charged</th><th class="r">OEM list</th><th class="r">vs list</th>
+        <th>Part</th><th>Part #</th><th class="r">Qty</th><th class="r">Charged (net)</th>
+        <th class="r">OEM list</th><th class="r">vs list</th>
       </tr></thead><tbody></tbody></table>
       <div class="note warn" style="margin-top:14px"><span class="i">⚠</span>
-        <span>OEM list is the 2026 Carrier price file (treated as USD). If your invoice is older, "under list" partly reflects price inflation since then. Lines with no list match are excluded from the gauge.</span></div>
+        <span>Every charged price is editable — fix any misread and the gauges update live. OEM list is the 2026 Carrier file (treated as USD); for an older invoice "under list" partly reflects price inflation. A red flag means the charged price is wildly off the catalog and likely a misread.</span></div>
     </div>
 
   </div>
@@ -202,7 +203,7 @@ const PARTS_LIST = {
 };
 const normPN = s => (s||"").toString().replace(/[^0-9]/g,"");
 
-/* ---------- SRT reference passed to the model for job matching (Carrier trailer) ---------- */
+/* ---------- SRT reference for job matching (Carrier trailer) ---------- */
 const SRT_REFERENCE = `
 U41-A  R.S. (roadside) front door assembly R&R   0.5
 U42-A  C.S. (curbside) front door assembly R&R   0.5
@@ -219,60 +220,89 @@ E48-A1 Rear engine seal R&R                       4.5
 D1-A   Belt(s) R&R                               0.4
 `;
 
-const PROMPT = `You are an OCR + parsing engine for refrigeration trailer-unit repair invoices.
-Read the invoice and return ONLY a JSON object — no prose, no markdown fences.
+const PROMPT = `You are a careful OCR + parsing engine for Carrier / CTR refrigeration trailer-unit repair invoices.
+The attached images/PDF are the pages of ONE invoice (it may say "PG 1 OF 2", etc.). Read EVERY page and return ONE combined result. Do not duplicate a line that repeats on another page.
 
-Use this Carrier trailer SRT reference to assign a job code + SRT hours to each distinct repair job described.
-If a job is not in the reference, estimate typical Carrier trailer SRT hours and set "estimated":true.
+INVOICE LAYOUT — read it exactly this way:
+- The LEFT side is a work narrative: "INSPECTED UNIT... REPLACE LEAKING CONDENSER... REPLACE TORN OFF KING VALVE...". These sentences are the repair JOBS. They have NO prices.
+- The RIGHT side is the priced PARTS table with columns: QTY ORDERED | QTY SHIPPED | BACK ORDERED | PART NUMBER AND DESCRIPTION | CODE | PRICE (LIST & SELL) | NET AMOUNT.
+- For each part, the charged amount is the RIGHTMOST "NET AMOUNT" column. Put that in "lineTotal". (The "PRICE (LIST & SELL)" column to its left is the unit price — note it as unitPrice but never confuse the two columns.)
+- NEVER attach a narrative sentence to a parts price. Jobs and parts are separate lists.
 
+DIGIT DISCIPLINE (this is a faded dot-matrix print — be meticulous):
+- Transcribe part numbers digit-by-digit including hyphens, e.g. "58-04738-01", "76-02000-00".
+- Read decimals exactly: "861.92" is eight-six-one point nine-two, not 86.19. "1389.54" not 138.95.
+- Watch the easily-confused pairs on faded print: 3/8, 5/6, 0/8, 1/7, 4/9.
+
+SELF-CHECK BEFORE ANSWERING:
+- Sum every part "lineTotal". It MUST equal the printed PARTS total at the bottom (within $1). If it does not, you misread a digit — re-examine and correct until it reconciles.
+- Capture LABOR (total billed hours and dollars — it is usually one combined "LAB REGULAR" line), SUPPLIES, TAX, and TOTAL.
+
+Assign each JOB a code + SRT hours from this reference; if a job is not listed, estimate typical Carrier trailer SRT hours and set "estimated":true.
 SRT REFERENCE:
 ${SRT_REFERENCE}
 
-Return this exact schema:
-{
- "unit": {"family":"", "model":"", "vin":"", "inServiceDate":"YYYY-MM-DD or ''", "hours": null},
- "currency": "CAD or USD",
- "jobs": [ {"repair":"short label", "code":"SRT code or ''", "srtHours": number, "estimated": boolean} ],
- "parts": [ {"desc":"", "partNumber":"as printed", "qty": number, "unitPrice": number, "lineTotal": number} ],
- "laborBilledHours": number,
- "laborCost": number,
- "partsTotal": number,
- "suppliesTotal": number,
- "taxTotal": number,
- "invoiceTotal": number
-}
-Capture every parts line with its part number and charged price. Capture the labor as total billed hours and dollars (even if it is a single combined line). If a value is not on the invoice, use 0 or ''.`;
+Return ONLY MINIFIED JSON (single line, no markdown, no prose). Keep text fields under 36 chars. Schema:
+{"unit":{"family":"","model":"","vin":"","inServiceDate":"YYYY-MM-DD or ''","hours":null},"currency":"CAD or USD","laborBilledHours":0,"laborCost":0,"partsTotal":0,"suppliesTotal":0,"taxTotal":0,"invoiceTotal":0,"jobs":[{"repair":"","code":"","srtHours":0,"estimated":false}],"parts":[{"desc":"","partNumber":"","qty":1,"unitPrice":0,"lineTotal":0}]}`;
 
-/* ---------- helpers ---------- */
-let FILE=null;
+/* ---------- file handling (multi-page) ---------- */
+let FILES=[];
 const $=id=>document.getElementById(id);
 const drop=$("drop"), fileIn=$("file");
 drop.onclick=()=>fileIn.click();
 ["dragover","dragenter"].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add("over");}));
 ["dragleave","drop"].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove("over");}));
-drop.addEventListener("drop",ev=>{ if(ev.dataTransfer.files[0]) setFile(ev.dataTransfer.files[0]); });
-fileIn.onchange=()=>{ if(fileIn.files[0]) setFile(fileIn.files[0]); };
-function setFile(f){ FILE=f; drop.classList.add("loaded"); $("dropTitle").textContent="✓ "+f.name+" — ready to analyze"; $("paste").value=""; }
+drop.addEventListener("drop",ev=>{ev.preventDefault();drop.classList.remove("over");addFiles(ev.dataTransfer.files);});
+fileIn.onchange=()=>addFiles(fileIn.files);
+function addFiles(list){
+  for(const f of list){ if(!FILES.some(x=>x.name===f.name&&x.size===f.size)) FILES.push(f); }
+  if(FILES.length) $("paste").value="";
+  renderFiles();
+}
+function renderFiles(){
+  const fl=$("filelist"); fl.innerHTML="";
+  FILES.forEach((f,i)=>{
+    const isPdf=f.type==="application/pdf";
+    fl.innerHTML+=`<div class="filerow"><span><span class="pg">${isPdf?'PDF':'Page '+(i+1)}</span> &nbsp;${f.name}</span><button onclick="rmFile(${i})" title="remove">✕</button></div>`;
+  });
+  $("dropTitle").textContent = FILES.length ? `✓ ${FILES.length} file${FILES.length>1?'s':''} ready — add more or analyze` : "Drop a PDF, or photos of every page — click to browse";
+}
+window.rmFile=i=>{FILES.splice(i,1);renderFiles();};
 
 const toB64=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(f);});
 
-function money(n,cur){ return (cur==="CAD"?"CA$":"$")+Math.round(n).toLocaleString(); }
+/* tolerant parser: fences, prose, truncated arrays/objects */
+function tryParse(raw){
+  let s=(raw||"").replace(/```json|```/gi,"").trim();
+  const start=s.indexOf("{"); if(start>0) s=s.slice(start);
+  try{ return JSON.parse(s); }catch(_){}
+  const balance=str=>{let inStr=false,esc=false,open=[];
+    for(const c of str){ if(inStr){if(esc)esc=false;else if(c==="\\")esc=true;else if(c==='"')inStr=false;}
+      else if(c==='"')inStr=true; else if(c==="{"||c==="[")open.push(c); else if(c==="}"||c==="]")open.pop(); }
+    return {inStr,open};};
+  const cut=Math.max(s.lastIndexOf("}"),s.lastIndexOf("]"));
+  if(cut>0){const t=s.slice(0,cut+1);const close=balance(t).open.reverse().map(c=>c==="{"?"}":"]").join("");
+    try{return JSON.parse(t+close);}catch(_){}}
+  const b=balance(s);
+  return JSON.parse(s+(b.inStr?'"':"")+b.open.reverse().map(c=>c==="{"?"}":"]").join(""));
+}
 
+function money(n,cur){ return (cur==="CAD"?"CA$":"$")+(Math.round(n)).toLocaleString(); }
+
+/* ---------- analyze ---------- */
 $("go").onclick=analyze;
 async function analyze(){
   const status=$("status");
-  if(!FILE && !$("paste").value.trim()){ status.innerHTML='<div class="note bad"><span class="i">⚠</span><span>Drop an invoice or paste the work performed first.</span></div>'; return; }
+  if(!FILES.length && !$("paste").value.trim()){ status.innerHTML='<div class="note bad"><span class="i">⚠</span><span>Drop a PDF / page images or paste the work performed first.</span></div>'; return; }
   $("go").disabled=true;
-  status.innerHTML='<div class="note"><span class="i"><span class="spinner"></span></span><span>Reading the invoice line by line…</span></div>';
+  status.innerHTML='<div class="note"><span class="i"><span class="spinner"></span></span><span>Reading every page and reconciling totals…</span></div>';
 
   let content=[];
-  if(FILE){
-    const b64=await toB64(FILE);
-    if(FILE.type==="application/pdf"){
-      content.push({type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}});
-    }else{
-      const mt = FILE.type && FILE.type.startsWith("image/") ? FILE.type : "image/jpeg";
-      content.push({type:"image",source:{type:"base64",media_type:mt,data:b64}});
+  if(FILES.length){
+    for(const f of FILES){
+      const b64=await toB64(f);
+      if(f.type==="application/pdf") content.push({type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}});
+      else content.push({type:"image",source:{type:"base64",media_type:(f.type&&f.type.startsWith("image/")?f.type:"image/jpeg"),data:b64}});
     }
     content.push({type:"text",text:PROMPT});
   } else {
@@ -282,92 +312,123 @@ async function analyze(){
   try{
     const resp=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content}]})
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4096,temperature:0,messages:[{role:"user",content}]})
     });
     const data=await resp.json();
     const text=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
-    const clean=text.replace(/```json|```/g,"").trim();
-    const parsed=JSON.parse(clean);
-    render(parsed);
+    STATE=tryParse(text);
+    STATE.jobs=STATE.jobs||[]; STATE.parts=STATE.parts||[];
+    renderAll();
     status.innerHTML="";
   }catch(err){
     console.error(err);
-    status.innerHTML='<div class="note bad"><span class="i">⚠</span><span>Couldn\'t read that automatically. On the live site this step needs the API proxy; inside Claude.ai it should work — try a clearer photo or paste the line items. ('+err.message+')</span></div>';
+    status.innerHTML='<div class="note bad"><span class="i">⚠</span><span>Couldn\'t read that cleanly ('+err.message+'). Inside Claude.ai a clearer photo or the PDF usually fixes it; you can also paste the line items. On the live site this step needs the API proxy.</span></div>';
   }
   $("go").disabled=false;
 }
 
-function render(d){
-  const cur=$("cur").value, fx=parseFloat($("fx").value)||1.37, rate=parseFloat($("rate").value)||100;
-  const usdToInv = u => cur==="CAD" ? u*fx : u;   // OEM list file = USD
-
+/* ---------- render + live recompute ---------- */
+let STATE=null;
+function renderAll(){
   $("results").classList.remove("hidden");
+  const d=STATE;
 
-  /* unit + warranty */
-  $("unitline").textContent = `${d.unit.family||$("unit").value} · ${d.unit.model||""} ${d.unit.vin?("· VIN "+d.unit.vin):""} ${d.unit.inServiceDate?("· in service "+d.unit.inServiceDate):""} ${d.unit.hours?("· "+d.unit.hours+" hrs"):""}`.replace(/\s+/g," ");
-  const txt=(($("paste").value)+" "+JSON.stringify(d.jobs||[])).toLowerCase();
-  const collision=/impact|collision|accident|missing|torn off|damage/.test(txt);
-  if(collision){
-    $("warrantyNote").innerHTML='<div class="note bad"><span class="i">⚑</span><span>This reads as <b>collision / impact damage</b>. Manufacturer warranty explicitly excludes accident damage — coverage status is moot here; this would be an insurance or out-of-pocket repair, not a warranty claim.</span></div>';
+  $("unitline").textContent = `${d.unit.family||$("unit").value} ${d.unit.model||""} ${d.unit.vin?("· VIN "+d.unit.vin):""} ${d.unit.inServiceDate?("· in service "+d.unit.inServiceDate):""} ${d.unit.hours?("· "+d.unit.hours+" hrs"):""}`.replace(/\s+/g," ").trim();
+  const txt=JSON.stringify(d.jobs).toLowerCase()+" "+$("paste").value.toLowerCase();
+  if(/impact|collision|accident|missing|torn off|damage/.test(txt)){
+    $("warrantyNote").innerHTML='<div class="note bad"><span class="i">⚑</span><span>This reads as <b>collision / impact damage</b>. Manufacturer warranty excludes accident damage — coverage status is moot here; this is an insurance or out-of-pocket repair, not a warranty claim.</span></div>';
     $("wbig").textContent="NOT WARRANTY"; $("wbig").style.color="var(--amber)"; $("wsub").textContent="accident exclusion";
   } else {
-    $("warrantyNote").innerHTML='<div class="note"><span class="i">💡</span><span>Grades against basic factory coverage. Check the serial plate — major components (engine/compressor, microprocessor) and some TransX 2021 X4 units carry longer terms.</span></div>';
+    $("warrantyNote").innerHTML='<div class="note"><span class="i">💡</span><span>Grades against basic factory coverage. Check the serial plate — major components and some TransX 2021 X4 units carry longer terms.</span></div>';
     $("wbig").textContent="CHECK PLATE"; $("wbig").style.color="var(--cyan)"; $("wsub").textContent="verify in-service + hours";
   }
 
-  /* SRT table */
-  const tb=$("srtTable").querySelector("tbody"); tb.innerHTML="";
-  let srtTot=0;
-  (d.jobs||[]).forEach(j=>{
-    srtTot+=(+j.srtHours||0);
-    tb.innerHTML+=`<tr><td>${j.repair}${j.estimated?' <span class="miss">(est)</span>':''}</td>
+  // jobs table (editable SRT hrs)
+  const jb=$("srtTable").querySelector("tbody"); jb.innerHTML="";
+  d.jobs.forEach((j,i)=>{
+    jb.innerHTML+=`<tr>
+      <td>${j.repair||""}${j.estimated?' <span class="miss">(est)</span>':''}</td>
       <td>${j.code?'<span class="code">'+j.code+'</span>':'<span class="miss">—</span>'}</td>
-      <td class="r mono">${(+j.srtHours||0).toFixed(2)}</td>
-      <td class="r mono">—</td>
-      <td class="r mono">${money((+j.srtHours||0)*rate,cur)}</td></tr>`;
+      <td class="r"><input class="cell-in s" value="${(+j.srtHours||0)}" oninput="editJob(${i},this.value)"></td>
+      <td class="r mono" id="jlab${i}"></td></tr>`;
   });
-  const billed=+d.laborBilledHours||0;
-  tb.innerHTML+=`<tr class="tot"><td>Totals</td><td></td>
-    <td class="r mono">${srtTot.toFixed(2)}</td>
-    <td class="r mono">${billed.toFixed(2)}</td>
-    <td class="r mono">${money(srtTot*rate,cur)}</td></tr>`;
-  $("laborNote").innerHTML=`This invoice bills labor as <b>${billed.toFixed(1)} combined hours</b> (no per-job split), graded against <b>${srtTot.toFixed(2)} total SRT hours</b>. Billed labor charged ${money(d.laborCost||billed*rate,cur)}.`;
+  jb.innerHTML+=`<tr class="tot"><td>Totals</td><td></td><td class="r mono" id="srtTot"></td><td class="r mono" id="srtLabTot"></td></tr>`;
 
-  /* labor gauge */
-  const lf = srtTot>0 ? billed/srtTot : 0;
-  drawGauge("laborGauge", lf, [1.1,1.4,1.7], 2.4);
+  $("billed").value = +d.laborBilledHours||0;
+  $("billed").oninput=()=>{STATE.laborBilledHours=+$("billed").value||0;recompute();};
+  $("laborCost").value = +d.laborCost||0;
+  $("laborCost").oninput=()=>{STATE.laborCost=+$("laborCost").value||0;recompute();};
+
+  // parts table (editable qty + charged)
+  const pb=$("partsTable").querySelector("tbody"); pb.innerHTML="";
+  d.parts.forEach((p,i)=>{
+    pb.innerHTML+=`<tr>
+      <td>${p.desc||""}</td>
+      <td class="mono" style="font-size:11px">${p.partNumber||""}</td>
+      <td class="r"><input class="cell-in s" value="${+p.qty||1}" oninput="editPart(${i},'qty',this.value)"></td>
+      <td class="r"><input class="cell-in" value="${+p.lineTotal||0}" oninput="editPart(${i},'lineTotal',this.value)"></td>
+      <td class="r mono" id="plist${i}"></td>
+      <td class="r" id="pratio${i}"></td></tr>`;
+  });
+  pb.innerHTML+=`<tr class="tot"><td id="pmatch"></td><td></td><td></td>
+    <td class="r mono" id="pcharged"></td><td class="r mono" id="plistTot"></td><td class="r mono" id="pratioTot"></td></tr>`;
+
+  ["rate","cur","fx"].forEach(id=>$(id).oninput=recompute);
+  recompute();
+  $("results").scrollIntoView({behavior:"smooth"});
+}
+
+window.editJob=(i,v)=>{STATE.jobs[i].srtHours=+v||0;recompute();};
+window.editPart=(i,f,v)=>{STATE.parts[i][f]=+v||0;recompute();};
+
+function recompute(){
+  const d=STATE, cur=$("cur").value, fx=parseFloat($("fx").value)||1.37, rate=parseFloat($("rate").value)||100;
+  const usdToInv=u=>cur==="CAD"?u*fx:u;
+
+  // labor
+  let srtTot=0;
+  d.jobs.forEach((j,i)=>{ const h=+j.srtHours||0; srtTot+=h; $("jlab"+i).textContent=money(h*rate,cur); });
+  $("srtTot").textContent=srtTot.toFixed(2);
+  $("srtLabTot").textContent=money(srtTot*rate,cur);
+  const billed=+d.laborBilledHours||0;
+  const lf=srtTot>0?billed/srtTot:0;
+  drawGauge("laborGauge",lf,[1.1,1.4,1.7],2.4);
   $("laborReading").innerHTML=`<b>${lf.toFixed(2)}×</b> Standard Repair Time`;
   $("laborVerdict").innerHTML=verdict(lf,1.1,1.7);
+  $("laborNote").innerHTML=`Labor billed as <b>${billed.toFixed(1)} hours</b> (one combined line) vs <b>${srtTot.toFixed(2)} total SRT hours</b>. Billed labor: ${money(+d.laborCost||billed*rate,cur)}.`;
 
-  /* parts table + gauge */
-  const pb=$("partsTable").querySelector("tbody"); pb.innerHTML="";
-  let charged=0, list=0, matched=0;
-  (d.parts||[]).forEach(p=>{
+  // parts
+  let charged=0,list=0,matched=0;
+  d.parts.forEach((p,i)=>{
     const m=PARTS_LIST[normPN(p.partNumber)];
-    const ct=+p.lineTotal||((+p.unitPrice||0)*(+p.qty||1));
-    charged+=ct;
-    let listCell='<span class="miss">no match</span>', ratioCell='<span class="miss">—</span>';
+    const ct=+p.lineTotal||0; charged+=ct;
+    const listCell=$("plist"+i), ratioCell=$("pratio"+i);
     if(m){
-      const lt=usdToInv(m.list)*(+p.qty||1);
-      list+=lt; matched++;
-      const r=ct/lt;
-      listCell=money(lt,cur);
-      ratioCell=`<span class="mono" style="color:${r<=1?'var(--green)':r<=1.2?'var(--amber)':'var(--red)'}">${r.toFixed(2)}×</span>`;
-    }
-    pb.innerHTML+=`<tr><td>${p.desc}</td><td class="mono" style="font-size:11px">${p.partNumber||''}</td>
-      <td class="r mono">${+p.qty||1}</td><td class="r mono">${money(ct,cur)}</td>
-      <td class="r mono">${listCell}</td><td class="r">${ratioCell}</td></tr>`;
+      const lt=usdToInv(m.list)*(+p.qty||1); list+=lt; matched++;
+      const r=lt>0?ct/lt:0;
+      listCell.textContent=money(lt,cur);
+      const col=r<=1?'var(--green)':r<=1.2?'var(--amber)':'var(--red)';
+      const misread=(r<0.15||r>6)?' <span class="flag" title="Charged is far from catalog — likely an OCR misread. Check the photo.">⚠</span>':'';
+      ratioCell.innerHTML=`<span class="mono" style="color:${col}">${r.toFixed(2)}×</span>${misread}`;
+    } else { listCell.innerHTML='<span class="miss">no match</span>'; ratioCell.innerHTML='<span class="miss">—</span>'; }
   });
-  pb.innerHTML+=`<tr class="tot"><td>Totals (${matched} of ${(d.parts||[]).length} matched)</td><td></td><td></td>
-    <td class="r mono">${money(charged,cur)}</td><td class="r mono">${money(list,cur)}</td>
-    <td class="r mono">${list>0?(charged/list).toFixed(2)+'×':'—'}</td></tr>`;
-
-  const pr = list>0 ? charged/list : 0;
-  drawGauge("partsGauge", pr, [1.0,1.1,1.2], 1.8);
+  $("pmatch").textContent=`Totals (${matched} of ${d.parts.length} matched)`;
+  $("pcharged").textContent=money(charged,cur);
+  $("plistTot").textContent=money(list,cur);
+  const pr=list>0?charged/list:0;
+  $("pratioTot").textContent=list>0?pr.toFixed(2)+"×":"—";
+  drawGauge("partsGauge",pr,[1.0,1.1,1.2],1.8);
   $("partsReading").innerHTML=`<b>${pr.toFixed(2)}×</b> OEM list price`;
   $("partsVerdict").innerHTML=verdict(pr,1.0,1.2);
 
-  $("results").scrollIntoView({behavior:"smooth"});
+  // reconciliation banner: parts lines vs printed parts total
+  const printed=+d.partsTotal||0;
+  const rec=$("reconcile");
+  if(printed>0){
+    const diff=Math.abs(charged-printed);
+    if(diff<=1) rec.innerHTML=`<div class="note ok"><span class="i">✓</span><span>Line items reconcile to the printed parts total (${money(printed,cur)}).</span></div>`;
+    else rec.innerHTML=`<div class="note bad"><span class="i">⚠</span><span>Line items sum to <b>${money(charged,cur)}</b> but the invoice's printed parts total is <b>${money(printed,cur)}</b> — off by ${money(diff,cur)}. A digit was likely misread; check the flagged rows and edit.</span></div>`;
+  } else rec.innerHTML="";
 }
 
 function verdict(v,goodMax,highMin){
@@ -376,21 +437,18 @@ function verdict(v,goodMax,highMin){
   return '<span style="color:var(--red)">High</span>';
 }
 
-/* semicircle gauge: value, thresholds [great, median, high], scale max */
 function drawGauge(id,val,th,max){
   const w=240,h=140,cx=120,cy=125,r=92;
   const ang=v=>Math.PI*(1-Math.min(v,max)/max);
-  const pt=(a,rr=r)=>[cx+rr*Math.cos(a), cy-rr*Math.sin(a)];
+  const pt=(a,rr=r)=>[cx+rr*Math.cos(a),cy-rr*Math.sin(a)];
   const arc=(a0,a1,col)=>{const[x0,y0]=pt(a0),[x1,y1]=pt(a1);return `<path d="M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}" stroke="${col}" stroke-width="13" fill="none" stroke-linecap="round"/>`;};
   const segs=[[0,th[0],"var(--green)"],[th[0],th[2],"var(--amber)"],[th[2],max,"var(--red)"]];
   let html=`<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-width:260px">`;
   segs.forEach(s=>html+=arc(ang(s[0]),ang(s[1]),s[2]));
   const a=ang(val);const[nx,ny]=pt(a,r-4);
-  html+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--txt)" stroke-width="2.5"/>`;
-  html+=`<circle cx="${cx}" cy="${cy}" r="5" fill="var(--txt)"/>`;
+  html+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--txt)" stroke-width="2.5"/><circle cx="${cx}" cy="${cy}" r="5" fill="var(--txt)"/>`;
   html+=`<text x="14" y="138" fill="var(--txt-3)" font-family="var(--mono)" font-size="9">0</text>`;
-  html+=`<text x="${w-22}" y="138" fill="var(--txt-3)" font-family="var(--mono)" font-size="9">${max}×</text>`;
-  html+=`</svg>`;
+  html+=`<text x="${w-22}" y="138" fill="var(--txt-3)" font-family="var(--mono)" font-size="9">${max}×</text></svg>`;
   $(id).innerHTML=html;
 }
 </script>
